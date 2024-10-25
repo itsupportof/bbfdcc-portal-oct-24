@@ -116,17 +116,26 @@ if ($_SESSION['currentSession'] != 1 ) {
                                             } ?></td>
 
                                         <td>
+
                                             <a href="?page=editUser&user=<?php echo $data["id"];?>" class="btn btn-primary btn-circle btn-md" id="edit<?php echo $data["id"];?>">
                                                 <i class="fas fa-edit"></i>
                                             </a>
                                             <a href="?page=deleteUser&source=allusers&user=<?php echo $data["id"];?>" class="btn btn-danger btn-circle btn-md" id="reject<?php echo $data["id"];?>">
                                                 <i class="fas fa-trash"></i>
                                             </a>
+                                            
+                                            <a href="#dialoguemodal" class="btn btn-primary btn-circle btn-md" id="edit">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
                                         </td>
                                     </tr>
                                 <?php }?>
                                 </tbody>
                             </table>
+                                                            <!-- Vertically centered modal -->
+                                <div class="dialoguemodal modal-dialog modal-dialog-centered">
+                                ...
+                                </div>
                         </div>
                     </div>
                 </div>
