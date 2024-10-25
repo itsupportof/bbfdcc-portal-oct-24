@@ -83,7 +83,6 @@ if ($_SESSION['currentSession'] != 1 ) {
                                     <th>First Name</th>
                                     <th>Last Name</th>
                                     <th>Email</th>
-                                    <th>Password</th>
                                     <th>Role</th>
                                     <th>Action</th>
                                 </tr>
@@ -94,7 +93,6 @@ if ($_SESSION['currentSession'] != 1 ) {
                                     <th>First Name</th>
                                     <th>Last Name</th>
                                     <th>Email</th>
-                                    <th>Password</th>
                                     <th>Role</th>
                                     <th>Action</th>
                                 </tr>
@@ -109,7 +107,6 @@ if ($_SESSION['currentSession'] != 1 ) {
                                         <td><?php echo $data["first name"];?></td>
                                         <td><?php echo $data["last name"];?></td>
                                         <td><?php echo $data["email"];?></td>
-                                        <td><?php echo getEducatorPassword($pdo, $data["id"]);?></td>
                                         <td><?php if($data["role"]=='1'){
                                                 echo 'admin';
                                             }elseif($data["role"]=='2'){
