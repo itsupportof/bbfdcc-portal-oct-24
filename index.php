@@ -267,7 +267,7 @@ if(!isset($_GET['page']) && isset($_SESSION['currentSession'])){
                 elseif($page == 'viewAllEvents'){
                     if($role==1 || $role==2){
                         $eventObj=new Event();
-                        $eventObj->viewAllEvent();
+                        $eventObj->viewAllEvents();
                     }else{
                         echo '<h1>Unauthorised access</h1>';
                     }
