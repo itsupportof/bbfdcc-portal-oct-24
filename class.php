@@ -15,7 +15,7 @@ if ($_SESSION['currentSession'] != 1 ) {
  * ****************************************
  */
 
-class User{
+ class User{
     ///////////////////////////////////////////
     //////////Logout//////////////
     /////////////////////////////////////////
@@ -83,6 +83,7 @@ class User{
                                     <th>First Name</th>
                                     <th>Last Name</th>
                                     <th>Email</th>
+                                    <th>Password</th>
                                     <th>Role</th>
                                     <th>Action</th>
                                 </tr>
@@ -93,6 +94,7 @@ class User{
                                     <th>First Name</th>
                                     <th>Last Name</th>
                                     <th>Email</th>
+                                    <th>Password</th>
                                     <th>Role</th>
                                     <th>Action</th>
                                 </tr>
@@ -104,9 +106,10 @@ class User{
                                     ?>
                                     <tr>
                                         <td style=""><?php echo $data["id"];?></td>
-                                        <td><?php echo $data["first name"];?></td>
-                                        <td><?php echo $data["last name"];?></td>
+                                        <td><?php echo $data["firstname"];?></td>
+                                        <td><?php echo $data["lastname"];?></td>
                                         <td><?php echo $data["email"];?></td>
+                                        <td><?php echo getEducatorPassword($pdo, $data["id"]);?></td>
                                         <td><?php if($data["role"]=='1'){
                                                 echo 'admin';
                                             }elseif($data["role"]=='2'){
@@ -275,11 +278,11 @@ class User{
                                 <input type="text" class="form-control form-control-user" id="userId" name="firstname" value="<?php echo $row["id"]; ?>" style="display: none;">
                                 <div class="col-sm-6 mb-3 mb-sm-0">
                                     <input type="text" class="form-control form-control-user" id="FirstName"
-                                           placeholder="First Name" name="firstname" value="<?php echo $row["first name"]; ?>">
+                                           placeholder="First Name" name="firstname" value="<?php echo $row["firstname"]; ?>">
                                 </div>
                                 <div class="col-sm-6">
                                     <input type="text" class="form-control form-control-user" id="LastName"
-                                           placeholder="Last Name" name="lastname" value="<?php echo $row["last name"]; ?>">
+                                           placeholder="Last Name" name="lastname" value="<?php echo $row["lastname"]; ?>">
                                 </div>
                             </div>
                             <div class="form-group">
@@ -403,6 +406,7 @@ class User{
                                     <th>First Name</th>
                                     <th>Last Name</th>
                                     <th>Email</th>
+                                    <th>Password</th>
                                     <th>Role</th>
                                     <th>Action</th>
                                 </tr>
@@ -413,6 +417,7 @@ class User{
                                     <th>First Name</th>
                                     <th>Last Name</th>
                                     <th>Email</th>
+                                    <th>Password</th>
                                     <th>Role</th>
                                     <th>Action</th>
                                 </tr>
@@ -424,9 +429,10 @@ class User{
                                     ?>
                                     <tr>
                                         <td style="display:none;"><?php echo $data["id"];?></td>
-                                        <td><?php echo $data["first name"];?></td>
-                                        <td><?php echo $data["last name"];?></td>
+                                        <td><?php echo $data["firstname"];?></td>
+                                        <td><?php echo $data["lastname"];?></td>
                                         <td><?php echo $data["email"];?></td>
+                                        <td><?php echo $data["password"];?></td>
                                         <td><?php if($data["role"]=='1'){
                                             echo 'admin';
                                         }elseif($data["role"]=='2'){
