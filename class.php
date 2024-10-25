@@ -80,8 +80,7 @@ if ($_SESSION['currentSession'] != 1 ) {
                                 <thead>
                                 <tr>
                                     <th style="">Id</th>
-                                    <th>First Name</th>
-                                    <th>Last Name</th>
+                                    <th>Name</th>
                                     <th>Email</th>
                                     <th>Password</th>
                                     <th>Role</th>
@@ -91,8 +90,7 @@ if ($_SESSION['currentSession'] != 1 ) {
                                 <tfoot>
                                 <tr>
                                     <th style="">Id</th>
-                                    <th>First Name</th>
-                                    <th>Last Name</th>
+                                    <th>Name</th>
                                     <th>Email</th>
                                     <th>Password</th>
                                     <th>Role</th>
@@ -106,8 +104,7 @@ if ($_SESSION['currentSession'] != 1 ) {
                                     ?>
                                     <tr>
                                         <td style=""><?php echo $data["id"];?></td>
-                                        <td><?php echo $data["firstname"];?></td>
-                                        <td><?php echo $data["lastname"];?></td>
+                                        <td><?php echo $data["name"];?></td>
                                         <td><?php echo $data["email"];?></td>
                                         <td><?php echo getEducatorPassword($pdo, $data["id"]);?></td>
                                         <td><?php if($data["role"]=='1'){
