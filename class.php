@@ -124,9 +124,10 @@ if ($_SESSION['currentSession'] != 1 ) {
                                                 <i class="fas fa-trash"></i>
                                             </a>
                                             
-                                            <a href="#dialoguemodal" class="btn btn-primary btn-circle btn-md" id="edit">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
+                                            <button type="button" class="btn btn-primary btn-circle btn-md" data-bs-toggle="modal" data-bs-target="#dialoguemodal">
+                                            <i class="fas fa-edit"></i>
+                                            </button>
+
                                         </td>
                                     </tr>
                                 <?php }?>
