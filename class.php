@@ -2761,7 +2761,7 @@ class Event{
     function viewAllEvent(){
         ?>
         <div class="row">
-            <div class="col-lg-2"><h1 style="color: black">Legendsads:</h1></div>
+            <div class="col-lg-2"><h1 style="color: black">Legends:</h1></div>
             <div class="col-lg-2" >
                 <div class="event-container" role="button" data-event-index="41" style="background: white">
                     <div class="event-icon">
