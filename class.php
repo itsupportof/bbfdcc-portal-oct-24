@@ -130,6 +130,10 @@ if ($_SESSION['currentSession'] != 1 ) {
                                             <button type="button" class="btn btn-danger btn-circle btn-md" onclick="confirmDelete()">
                                                 <i class="fas fa-trash"></i>
                                             </button>
+                                            <!-- Delete Button in Each Row -->
+                                            <a href="javascript:void(0);" onclick="confirmDelete(<?php echo $data['id']; ?>)" class="btn btn-danger btn-circle btn-md">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
 
                                         </td>
                                     </tr>
@@ -137,7 +141,7 @@ if ($_SESSION['currentSession'] != 1 ) {
                                 </tbody>
                             </table>
                             <script>
-    function confirmDelete() {
+    function confirmDelete(userID) {
         Swal.fire({
             title: 'Are you sure?',
             text: "You won't be able to revert this!",
@@ -148,13 +152,8 @@ if ($_SESSION['currentSession'] != 1 ) {
             confirmButtonText: 'Yes, delete it!'
         }).then((result) => {
             if (result.isConfirmed) {
-                // Proceed with deletion
-                deleteRecord();
-                Swal.fire(
-                    'Deleted!',
-                    'Your record has been deleted.',
-                    'success'
-                );
+                // Redirect to the deletion URL
+                window.location.href = `?page=deleteUser&source=allusers&user=${userID}`;
             }
         });
     }
