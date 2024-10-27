@@ -120,21 +120,11 @@ if ($_SESSION['currentSession'] != 1 ) {
                                             <a href="?page=editUser&user=<?php echo $data["id"];?>" class="btn btn-primary btn-circle btn-md" id="edit<?php echo $data["id"];?>">
                                                 <i class="fas fa-edit"></i>
                                             </a>
-                                            <a href="?page=deleteUser&source=allusers&user=<?php echo $data["id"];?>" class="btn btn-danger btn-circle btn-md" id="reject<?php echo $data["id"];?>">
-                                                <i class="fas fa-trash"></i>
-                                            </a>
-                                            
-                                            <button type="button" class="btn btn-primary btn-circle btn-md">
-                                                 <i class="fas fa-edit"></i>
-                                            </button>
-                                            <button type="button" class="btn btn-danger btn-circle btn-md" onclick="confirmDelete()">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
                                             <!-- Delete Button in Each Row -->
                                             <a href="javascript:void(0);" onclick="confirmDelete(<?php echo $data['id']; ?>)" class="btn btn-danger btn-circle btn-md">
                                                 <i class="fas fa-trash"></i>
                                             </a>
-
+                                        
                                         </td>
                                     </tr>
                                 <?php }?>
