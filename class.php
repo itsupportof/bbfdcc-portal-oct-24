@@ -124,8 +124,11 @@ if ($_SESSION['currentSession'] != 1 ) {
                                                 <i class="fas fa-trash"></i>
                                             </a>
                                             
-                                            <button type="button" class="btn btn-primary btn-circle btn-md" data-bs-toggle="modal" data-bs-target="#dialoguemodal">
-                                            <i class="fas fa-edit"></i>
+                                            <button type="button" class="btn btn-primary btn-circle btn-md">
+                                                 <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-danger btn-circle btn-md" onclick="confirmDelete()">
+                                                <i class="fas fa-trash"></i>
                                             </button>
 
                                         </td>
@@ -133,10 +136,34 @@ if ($_SESSION['currentSession'] != 1 ) {
                                 <?php }?>
                                 </tbody>
                             </table>
-                                                            <!-- Vertically centered modal -->
-                                <div class="dialoguemodal modal-dialog modal-dialog-centered">
-                                ...
-                                </div>
+                            <script>
+    function confirmDelete() {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Proceed with deletion
+                deleteRecord();
+                Swal.fire(
+                    'Deleted!',
+                    'Your record has been deleted.',
+                    'success'
+                );
+            }
+        });
+    }
+
+    function deleteRecord() {
+        // Your deletion code here (e.g., AJAX request to delete the record)
+        console.log("Record deleted");
+    }
+</script>
                         </div>
                     </div>
                 </div>

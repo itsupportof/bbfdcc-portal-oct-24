@@ -57,6 +57,10 @@ if(!isset($_GET['page']) && isset($_SESSION['currentSession'])){
     <!-- Custom styles for this page -->
     <link href="vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
     <script type="text/javascript" src="js/jquery-3.6.0.min.js"></script>
+    <!-- SweetAlert2 CSS and JavaScript -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 </head>
 
 <body id="page-top">
