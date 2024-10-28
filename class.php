@@ -1593,12 +1593,34 @@ if(isset($_GET['status']) && $_GET['status']=="deleted"){?>
                                     <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deletemodal<?php echo $row[$i]["rid"];?>">
                                     <i class="fas fa-trash"></i>
                                     </button>
+                                    
+                                    <a href="javascript:void(0);" onclick="confirmDelete(<?php echo $row[$i]['rid']; ?>)" class="btn btn-danger btn-circle btn-md">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
                                 </td>
                             </tr>
                         <?php }?>
 
                         </tbody>
                     </table>
+                    <script>
+                        function confirmDelete(sourceID) {
+                            Swal.fire({
+                                title: 'Are you sure?',
+                                text: "You won't be able to revert this!",
+                                icon: 'warning',
+                                showCancelButton: true,
+                                confirmButtonColor: '#d33',
+                                cancelButtonColor: '#3085d6',
+                                confirmButtonText: 'Yes, delete it!'
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    // Redirect to the deletion URL
+                                    window.location.href = `?page=deleteAResource&id=${sourceID}`;
+                                }
+                            });
+                        }
+                    </script>
                 </div>
             </div>
         </div>
