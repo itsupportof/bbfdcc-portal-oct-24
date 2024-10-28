@@ -3053,11 +3053,32 @@ class Event{
                                             <a href="?page=deleteEvent&id=<?php echo $data["id"];?>" class="btn btn-danger btn-circle btn-md" id="reject<?php echo $data["id"];?>">
                                                 <i class="fas fa-trash"></i>
                                             </a>
+                                            <a href="javascript:void(0);" onclick="confirmDelete(<?php echo $data['id']; ?>)" class="btn btn-danger btn-circle btn-md">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
                                         </td>
                                     </tr>
                                 <?php }?>
                                 </tbody>
                             </table>
+                            <script>
+                                function confirmDelete(eventID) {
+                                    Swal.fire({
+                                        title: 'Are you sure?',
+                                        text: "You won't be able to revert this!",
+                                        icon: 'warning',
+                                        showCancelButton: true,
+                                        confirmButtonColor: '#d33',
+                                        cancelButtonColor: '#3085d6',
+                                        confirmButtonText: 'Yes, delete it!'
+                                    }).then((result) => {
+                                        if (result.isConfirmed) {
+                                            // Redirect to the deletion URL
+                                            window.location.href = `?page=deleteEvent&id=${eventID}`;
+                                        }
+                                    });
+                                }
+                            </script>
                         </div>
                     </div>
                 </div>
