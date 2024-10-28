@@ -3050,9 +3050,6 @@ class Event{
                                             <a href="?page=editEvent&id=<?php echo $data["id"];?>" class="btn btn-primary btn-circle btn-md" id="edit<?php echo $data["id"];?>">
                                                 <i class="fas fa-edit"></i>
                                             </a>
-                                            <a href="?page=deleteEvent&id=<?php echo $data["id"];?>" class="btn btn-danger btn-circle btn-md" id="reject<?php echo $data["id"];?>">
-                                                <i class="fas fa-trash"></i>
-                                            </a>
                                             <a href="javascript:void(0);" onclick="confirmDelete(<?php echo $data['id']; ?>)" class="btn btn-danger btn-circle btn-md">
                                                 <i class="fas fa-trash"></i>
                                             </a>
