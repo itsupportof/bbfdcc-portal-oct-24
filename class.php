@@ -1562,38 +1562,11 @@ if(isset($_GET['status']) && $_GET['status']=="deleted"){?>
                                 </td>
                                 <td><?php echo $row[$i]["source"];?></td>
                                 <td>
-                                    <!-- Modal -->
-                                    <div class="modal fade" id="deletemodal<?php echo $row[$i]["rid"];?>" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                                    <div class="modal-dialog" role="document">
-                                        <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
-                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
-                                            </button>
-                                        </div>
-                                        <div class="modal-body">
-                                            Are you sure you want to delete this resource? Don't blame the developer later on :)
-                                        </div>
-                                        <div class="modal-footer">
-                                            <a class="btn btn-danger" href="?page=deleteAResource&id=<?php echo $row[$i]["rid"];?>" class="btn btn-danger btn-circle btn-md">
-                                                                                Delete <i class="fas fa-trash"></i>
-                                                                            </a>
-                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                        </div>
-                                        </div>
-                                    </div>
-                                    </div>
-                                    
                                     <!--look in lib file for implementation of if isset($_GET['action']=='editResouce'){}-->
                                     <a href="?page=editingResource&id=<?php echo $row[$i]["rid"];?>" class="btn btn-primary btn-circle btn-md">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    
-                                    <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deletemodal<?php echo $row[$i]["rid"];?>">
-                                    <i class="fas fa-trash"></i>
-                                    </button>
-                                    
+
                                     <a href="javascript:void(0);" onclick="confirmDelete(<?php echo $row[$i]['rid']; ?>)" class="btn btn-danger btn-circle btn-md">
                                         <i class="fas fa-trash"></i>
                                     </a>
