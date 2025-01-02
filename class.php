@@ -2775,29 +2775,30 @@ class Meeting{
         } catch (PDOException $e) {
             echo "Error : ".$e->getMessage();
         }
-        $files=unserialize($row["files"]);
-        $countFiles=count($files);
-        if($countFiles!=0){
-            if($countFiles!=0){
-                for ($j=1; $j <$countFiles+1 ; $j++) {
-                    if (file_exists("books/".$files[$j])){
-                        unlink("books/".$files[$j]);
-                    }
-                }
-            }
-        }
+        var_dump($row);
+        // $files=unserialize($row["files"]);
+        // $countFiles=count($files);
+        // if($countFiles!=0){
+        //     if($countFiles!=0){
+        //         for ($j=1; $j <$countFiles+1 ; $j++) {
+        //             if (file_exists("books/".$files[$j])){
+        //                 unlink("books/".$files[$j]);
+        //             }
+        //         }
+        //     }
+        // }
 
-        try {
-            $sql = "Delete from `meetings` WHERE id=?";
-            $stmt= $pdo->prepare($sql);
-            $stmt->execute([$meetingId]);
+        // try {
+        //     $sql = "Delete from `meetings` WHERE id=?";
+        //     $stmt= $pdo->prepare($sql);
+        //     $stmt->execute([$meetingId]);
 
-        } catch (PDOException $e) {
-            echo "Error : ".$e->getMessage();
-        }
-        $URL="?page=deleteMeeting&status=deleted";
-        echo "<script type='text/javascript'>document.location.href='{$URL}';</script>";
-        echo '<META HTTP-EQUIV="refresh" content="0;URL=' . $URL . '">';
+        // } catch (PDOException $e) {
+        //     echo "Error : ".$e->getMessage();
+        // }
+        // $URL="?page=deleteMeeting&status=deleted";
+        // echo "<script type='text/javascript'>document.location.href='{$URL}';</script>";
+        // echo '<META HTTP-EQUIV="refresh" content="0;URL=' . $URL . '">';
     }
 }
 /*-----------------v1.0 changes for calender-------------*/
