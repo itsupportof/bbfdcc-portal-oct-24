@@ -103,7 +103,6 @@ if(!isset($_GET['page']) && isset($_SESSION['currentSession'])){
                 $page = $_GET['page'];
                 /*-----------------v1.0 changes for calender-------------*/
                 if($page == 'home'){
-                    echo 'test';
                     if($role==3){
                         $resources=new Resources();
                         $resources->viewAllResources();
