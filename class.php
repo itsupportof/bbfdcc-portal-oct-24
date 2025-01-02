@@ -2776,8 +2776,12 @@ class Meeting{
             echo "Error : ".$e->getMessage();
         }
         $files=unserialize($row["files"]);
-        $countFiles=count($files);
-        if($countFiles!=0 || $row["files"]!="N;"){
+        if($row["files"]!="N;"){
+            $countFiles=count($files);
+        }else{
+            $countFiles=0;
+        }
+        if($countFiles!=0){
             if($countFiles!=0){
                 for ($j=1; $j <$countFiles+1 ; $j++) {
                     if (file_exists("books/".$files[$j])){
