@@ -70,7 +70,7 @@ require 'lib.php';
                             loginProcess:1
                         },
                         success: function(data){
-                            //alert(data);
+                            alert(data);
                             if (data.includes("Success")) {
                                 $("#messageblock").css("display","block");
                                 $('#msg').html(data);
