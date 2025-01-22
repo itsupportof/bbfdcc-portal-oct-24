@@ -35,7 +35,7 @@ require 'lib.php';
         $(document).ready(function() {
             alert('m here 1');
             $('#loginform').submit(function(e) {
-                alert('m here');
+                alert('m hereads');
                 e.preventDefault();
                 // $("#errorblock").css("display","none");
                 // $("#messageblock").css("display","none");
