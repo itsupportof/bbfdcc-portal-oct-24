@@ -31,16 +31,8 @@ require 'lib.php';
     <!-- Custom styles for this template-->
     <link href="css/sb-admin-2.min.css" rel="stylesheet">
     <script type="text/javascript">
-        window.onload = function() {
-    if (window.jQuery) {  
-        // jQuery is loaded  
-        alert("Yeah!");
-    } else {
-        // jQuery is not loaded
-        alert("Doesn't Work");
-    }
-}
         $(document).ready(function() {
+            alert('m here 1');
             $('#loginform').submit(function(e) {
                 alert('m here');
                 e.preventDefault();
