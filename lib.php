@@ -54,8 +54,8 @@ else if(isset($_POST['page'])&& $_POST['page']=='getCalenderDetails'){
 function loginlogic() {
     //include ("config.php");
     global $pdo;
-    var_dump($_POST);
-    exit(0);
+    // var_dump($_POST);
+    // exit(0);
     $msg = "";
     $username = trim($_POST['username']);
     $password = md5(trim($_POST['password']));
@@ -103,6 +103,7 @@ function loginlogic() {
         // var_dump($msg);
         //             exit(0);
     }
+    echo $msg;
 }
 /*****************************************
  * Register Student
