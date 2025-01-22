@@ -106,13 +106,13 @@ require 'lib.php';
                             </div>
                             <div class="col-lg-6">
                                 <div class="p-5">
-                                    <form method="post">
+                                <form class="user" id="loginform" method="post" action="">
                                         <div class="text-center">
                                             <div class="sidebar-brand-text mx-3" style="padding: 20px;"><img src="img/bbfdc logo.png" width="150px;"></div>
 
                                             <h1 class="h4 text-gray-900 mb-4">Welcome Back!</h1>
                                         </div>
-                                        <form class="user" id="loginform" method="post" action="">
+                                        
                                             <div class="form-group">
                                                 <input type="email" class="form-control form-control-user"
                                                     id="email" aria-describedby="emailHelp"
