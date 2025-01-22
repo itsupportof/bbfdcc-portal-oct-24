@@ -119,6 +119,7 @@ require 'lib.php';
                             registerationProcess:1
                         },
                         success: function(data){
+                            alert(data);
                             var a = data.includes("Success");
                             if (a) {
                                 $("#messageblock").css("display","block");
