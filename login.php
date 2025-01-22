@@ -32,7 +32,7 @@ require 'lib.php';
     <link href="css/sb-admin-2.min.css" rel="stylesheet">
     <script type="text/javascript">
         $(document).ready(function() {
-            $('#registrationform').submit(function(e) {
+            $('#loginform').submit(function(e) {
                 e.preventDefault();
                 $("#errorblock").css("display","none");
                 $("#messageblock").css("display","none");
@@ -45,7 +45,6 @@ require 'lib.php';
                     $('#email').after('<div class="error" style="padding-top:10px;margin:0px;"><p style="color:red; font-size:12px;margin:0px;">This field is required</p></div>');
                     errorCount++;
                 } else {
-
                     var validEmail = EmailregEx.test(email);
                     if (!validEmail) {
                         $('#email').after('<div class="error" style="padding-top:10px;"margin:0px;><p class="error" style="color:red; font-size:12px;margin:0px;">Enter a valid email</p></div>');
@@ -110,19 +109,34 @@ require 'lib.php';
 
                                             <h1 class="h4 text-gray-900 mb-4">Welcome Back!</h1>
                                         </div>
-                                        <form class="user">
+                                        <form class="user" id="loginform" method="post" action="">
                                             <div class="form-group">
                                                 <input type="email" class="form-control form-control-user"
                                                     id="email" aria-describedby="emailHelp"
-                                                    placeholder="Enter Email Address..." name="username">
+                                                    placeholder="Enter Email Address..." name="email">
                                             </div>
                                             <div class="form-group">
                                                 <input type="password" class="form-control form-control-user"
                                                     id="password" placeholder="Password" name="password">
                                             </div>
+                                            <div id="passworderror" style="margin-left: 20px;"></div>
+
                                         <input type="submit" name="submitBtnLogin" id="submitBtnLogin" value="Login" class="btn btn-primary btn-user btn-block" />
                                             <br>
-                                            <span class="loginMsg" style="color:red;"><?php echo @$msg;?></span>
+                                           
+                                            <div id="messageblock" style="padding-top:10px; display: none; ">
+                                                <div class="card mb-4 py-3 border-left-success" style="padding-top:0px !important;padding-bottom:0px !important; ">
+                                                    <div class="card-body" style="color:#1cc88a" id="msg">
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div id="errorblock" style="padding-top:10px; display: none; ">
+                                                <div class="card mb-4 py-3 border-left-danger" style="padding-top:0px !important;padding-bottom:0px !important; ">
+                                                    <div class="card-body" style="color:red" id="errormsg">
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </form>
                                         <hr>
                                         <div class="text-center">
@@ -134,7 +148,6 @@ require 'lib.php';
                                         <div class="text-center">
                                             <a class="small" href="https://brightbeginningsfdcc.com.au/">Go back to Bright Beginnings Website</a>
                                         </div>
-                                    </form>
                                 </div>
                             </div>
                         </div>
