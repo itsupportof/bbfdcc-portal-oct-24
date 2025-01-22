@@ -33,6 +33,7 @@ require 'lib.php';
     <script type="text/javascript">
         $(document).ready(function() {
             $('#loginform').submit(function(e) {
+                alert('m here');
                 e.preventDefault();
                 $("#errorblock").css("display","none");
                 $("#messageblock").css("display","none");
