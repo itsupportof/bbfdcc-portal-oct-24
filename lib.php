@@ -57,8 +57,8 @@ function loginlogic() {
     // var_dump($_POST);
     // exit(0);
     $msg = "";
-    $username = trim($_POST['username']);
-    $password = md5(trim($_POST['password']));
+    $username = trim($_POST['Email']);
+    $password = md5(trim($_POST['Password']));
 
     if($username != "" && $password != "") {
         try {
@@ -69,42 +69,40 @@ function loginlogic() {
             $stmt->execute();
             $row   = $stmt->fetch(PDO::FETCH_ASSOC);
             $count = $stmt->rowCount();
-            var_dump($row);
-            exit(0);
-            //$name=$row['first name'].' '.$row['last name'];
+            // echo var_dump($row);
+            $name=$row['first name'].' '.$row['last name'];
 
-            // if($count == 1 && !empty($row)) {
-            //     if($row['verified']==0){
-            //         $msg = "Your account is not approved by admin. Please contact your admin to get it approved!";
-            //     }else{
-            //         $userId=$row["id"];
-            //         if (!isset($_SESSION)) {
-            //             session_start();
-            //         }
-            //         $_SESSION['currentSession']=1;
-            //         $_SESSION['role']=$row["role"];
-            //         $_SESSION['userid']=$row ["id"];
-            //         $_SESSION['name']=$name;
-            //         $msg = "Log in Success!";
-            //         // var_dump($_SESSION);
-            //         // exit(0);
-            //         $URL="/portal?page=home";
-            //         echo "<script type='text/javascript'>document.location.href='{$URL}';</script>";
-            //         echo '<META HTTP-EQUIV="refresh" content="0;URL=' . $URL . '">';
-            //     }
-            // } else {
-            //     $msg = "Invalid username and password!";
-            // }
+            if($count == 1 && !empty($row)) {
+                if($row['verified']==0){
+                    $msg = "Your account is not approved by admin. Please contact your admin to get it approved!";
+                }else{
+                    $userId=$row["id"];
+                    if (!isset($_SESSION)) {
+                        session_start();
+                    }
+                    $_SESSION['currentSession']=1;
+                    $_SESSION['role']=$row["role"];
+                    $_SESSION['userid']=$row ["id"];
+                    $_SESSION['name']=$name;
+                    $msg = "Log in Success!";
+                    // var_dump($_SESSION);
+                    // exit(0);
+                    $URL="/portal?page=home";
+                    echo "<script type='text/javascript'>document.location.href='{$URL}';</script>";
+                    echo '<META HTTP-EQUIV="refresh" content="0;URL=' . $URL . '">';
+                }
+            } else {
+                $msg = "Invalid username and password!";
+            }
         } catch (PDOException $e) {
             echo "Error : ".$e->getMessage();
         }
     } else {
-        //$msg = "Both fields are required!";
+        $msg = "Both fields are required!";
     
         // var_dump($msg);
         //             exit(0);
     }
-    //echo $msg;
 }
 /*****************************************
  * Register Student
