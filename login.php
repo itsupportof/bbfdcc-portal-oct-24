@@ -36,53 +36,53 @@ require 'lib.php';
         $(document).ready(function() {
             alert('m here 1');
             $('#loginform').submit(function(e) {
-                alert('m hereads');
+                //alert('m hereads');
                 e.preventDefault();
-                // $("#errorblock").css("display","none");
-                // $("#messageblock").css("display","none");
-                // var email = $('#email').val();
-                // var password = $('#password').val();
-                // var EmailregEx = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-                // var errorCount=0;
-                // $(".error").remove();
-                // if (email.length < 1) {
-                //     $('#email').after('<div class="error" style="padding-top:10px;margin:0px;"><p style="color:red; font-size:12px;margin:0px;">This field is required</p></div>');
-                //     errorCount++;
-                // } else {
-                //     var validEmail = EmailregEx.test(email);
-                //     if (!validEmail) {
-                //         $('#email').after('<div class="error" style="padding-top:10px;"margin:0px;><p class="error" style="color:red; font-size:12px;margin:0px;">Enter a valid email</p></div>');
-                //         errorCount++;
-                //     }
-                // }
-                // if (password.length < 0 ) {
-                //     $('#passworderror').append('<div class="error" style="padding-top:10px;margin:0px;margin:0px;"><p class="error" style="color:red; font-size:12px;">Password cannot be empty</p></div>');
-                //     errorCount++;
-                // }
+                $("#errorblock").css("display","none");
+                $("#messageblock").css("display","none");
+                var email = $('#email').val();
+                var password = $('#password').val();
+                var EmailregEx = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+                var errorCount=0;
+                $(".error").remove();
+                if (email.length < 1) {
+                    $('#email').after('<div class="error" style="padding-top:10px;margin:0px;"><p style="color:red; font-size:12px;margin:0px;">This field is required</p></div>');
+                    errorCount++;
+                } else {
+                    var validEmail = EmailregEx.test(email);
+                    if (!validEmail) {
+                        $('#email').after('<div class="error" style="padding-top:10px;"margin:0px;><p class="error" style="color:red; font-size:12px;margin:0px;">Enter a valid email</p></div>');
+                        errorCount++;
+                    }
+                }
+                if (password.length < 0 ) {
+                    $('#passworderror').append('<div class="error" style="padding-top:10px;margin:0px;margin:0px;"><p class="error" style="color:red; font-size:12px;">Password cannot be empty</p></div>');
+                    errorCount++;
+                }
 
-                // if(errorCount==0){
-                //     $.ajax({
-                //         url: "lib.php",
-                //         type: "POST",
-                //         data: {
-                //             Email: email,
-                //             Password: password,
-                //             loginProcess:1
-                //         },
-                //         success: function(data){
-                //             alert(data);
-                //             if (data.includes("Success")) {
-                //                 $("#messageblock").css("display","block");
-                //                 $('#msg').html(data);
-                //                 $('#registrationform').find('input').val('');
-                //             } else {
-                //                 $("#errorblock").css("display","block");
-                //                 $('#errormsg').html(data);
-                //             }
-                //         }
-                //     });
+                if(errorCount==0){
+                    $.ajax({
+                        url: "lib.php",
+                        type: "POST",
+                        data: {
+                            Email: email,
+                            Password: password,
+                            loginProcess:1
+                        },
+                        success: function(data){
+                            alert(data);
+                            if (data.includes("Success")) {
+                                $("#messageblock").css("display","block");
+                                $('#msg').html(data);
+                                $('#registrationform').find('input').val('');
+                            } else {
+                                $("#errorblock").css("display","block");
+                                $('#errormsg').html(data);
+                            }
+                        }
+                    });
 
-                // }
+                }
             });
 
         });
