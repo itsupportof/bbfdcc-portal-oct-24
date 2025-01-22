@@ -465,14 +465,33 @@ if ($_SESSION['currentSession'] != 1 ) {
                                             <a href="?page=editUser&user=<?php echo $data["id"];?>" class="btn btn-primary btn-circle btn-md" id="edit<?php echo $data["id"];?>">
                                                 <i class="fas fa-edit"></i>
                                             </a>
-                                            <a href="?page=deleteUser&source=pendingUser&user=<?php echo $data["id"];?>" class="btn btn-danger btn-circle btn-md" id="reject<?php echo $data["id"];?>">
+                                            <a href="javascript:void(0);" onclick="confirmDelete(<?php echo $data['id']; ?>)" class="btn btn-danger btn-circle btn-md" id="reject<?php echo $data["id"];?>">
                                                 <i class="fas fa-trash"></i>
                                             </a>
+
                                         </td>
                                     </tr>
                                 <?php }?>
                                 </tbody>
                             </table>
+                            <script>
+                                function confirmDelete(meetingID) {
+                                    Swal.fire({
+                                        title: 'Are you sure?',
+                                        text: "You won't be able to revert this!",
+                                        icon: 'warning',
+                                        showCancelButton: true,
+                                        confirmButtonColor: '#d33',
+                                        cancelButtonColor: '#3085d6',
+                                        confirmButtonText: 'Yes, delete it!'
+                                    }).then((result) => {
+                                        if (result.isConfirmed) {
+                                            // Redirect to the deletion URL
+                                            window.location.href = `?page=deleteUser&source=pendingUser&user=${meetingID}`;
+                                        }
+                                    });
+                                }
+                            </script> 
                         </div>
                     </div>
                 </div>
