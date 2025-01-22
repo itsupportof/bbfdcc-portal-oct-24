@@ -69,7 +69,7 @@ function loginlogic() {
             $stmt->execute();
             $row   = $stmt->fetch(PDO::FETCH_ASSOC);
             $count = $stmt->rowCount();
-            echo var_dump($row);
+            var_dump($row);
             exit(0);
             //$name=$row['first name'].' '.$row['last name'];
 
