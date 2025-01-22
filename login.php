@@ -36,19 +36,19 @@ require 'lib.php';
                 e.preventDefault();
                 $("#errorblock").css("display","none");
                 $("#messageblock").css("display","none");
-                var email = $('#Email').val();
-                var password = $('#Password').val();
+                var email = $('#email').val();
+                var password = $('#password').val();
                 var EmailregEx = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
                 var errorCount=0;
                 $(".error").remove();
                 if (email.length < 1) {
-                    $('#Email').after('<div class="error" style="padding-top:10px;margin:0px;"><p style="color:red; font-size:12px;margin:0px;">This field is required</p></div>');
+                    $('#email').after('<div class="error" style="padding-top:10px;margin:0px;"><p style="color:red; font-size:12px;margin:0px;">This field is required</p></div>');
                     errorCount++;
                 } else {
 
                     var validEmail = EmailregEx.test(email);
                     if (!validEmail) {
-                        $('#Email').after('<div class="error" style="padding-top:10px;"margin:0px;><p class="error" style="color:red; font-size:12px;margin:0px;">Enter a valid email</p></div>');
+                        $('#email').after('<div class="error" style="padding-top:10px;"margin:0px;><p class="error" style="color:red; font-size:12px;margin:0px;">Enter a valid email</p></div>');
                         errorCount++;
                     }
                 }
@@ -76,8 +76,6 @@ require 'lib.php';
                                 $("#errorblock").css("display","block");
                                 $('#errormsg').html(data);
                             }
-
-
                         }
                     });
 
@@ -115,12 +113,12 @@ require 'lib.php';
                                         <form class="user">
                                             <div class="form-group">
                                                 <input type="email" class="form-control form-control-user"
-                                                    id="exampleInputEmail" aria-describedby="emailHelp"
+                                                    id="email" aria-describedby="emailHelp"
                                                     placeholder="Enter Email Address..." name="username">
                                             </div>
                                             <div class="form-group">
                                                 <input type="password" class="form-control form-control-user"
-                                                    id="exampleInputPassword" placeholder="Password" name="password">
+                                                    id="password" placeholder="Password" name="password">
                                             </div>
                                         <input type="submit" name="submitBtnLogin" id="submitBtnLogin" value="Login" class="btn btn-primary btn-user btn-block" />
                                             <br>

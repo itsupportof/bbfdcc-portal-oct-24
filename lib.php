@@ -55,7 +55,7 @@ function loginlogic() {
     //include ("config.php");
     global $pdo;
     var_dump($_POST);
-    exit();
+    exit(0);
     $msg = "";
     $username = trim($_POST['username']);
     $password = md5(trim($_POST['password']));
