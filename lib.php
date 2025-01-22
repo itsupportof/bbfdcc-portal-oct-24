@@ -164,7 +164,7 @@ function registerationlogic(){
             $stmt->bindParam('role', $_POST['Role'], PDO::PARAM_STR);
             $stmt->bindParam('verified', $verified, PDO::PARAM_STR);
             $stmt->execute();
-            // echo 'Success: Contact your admin to approve your request!';
+            echo 'Success: Contact your admin to approve your request!';
         }else{
             echo 'Error: Email Already Registered!';
         }
