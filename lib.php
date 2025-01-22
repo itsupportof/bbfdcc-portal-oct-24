@@ -54,12 +54,12 @@ else if(isset($_POST['page'])&& $_POST['page']=='getCalenderDetails'){
 function loginlogic() {
     //include ("config.php");
     global $pdo;
-    // var_dump($_POST);
-    // exit(0);
+    var_dump($_POST);
+    exit(0);
     $msg = "";
     $username = trim($_POST['Email']);
     $password = md5(trim($_POST['Password']));
-
+    
     if($username != "" && $password != "") {
         try {
             $query = "select * from `user` where `email`=:username and `password`=:password";
