@@ -428,7 +428,6 @@ if ($_SESSION['currentSession'] != 1 ) {
                                     <th style="display:none;">Id</th>
                                     <th>Name</th>
                                     <th>Email</th>
-                                    <th>Password</th>
                                     <th>Role</th>
                                     <th>Action</th>
                                 </tr>
@@ -438,7 +437,6 @@ if ($_SESSION['currentSession'] != 1 ) {
                                     <th style="display:none;">Id</th>
                                     <th>Name</th>
                                     <th>Email</th>
-                                    <th>Password</th>
                                     <th>Role</th>
                                     <th>Action</th>
                                 </tr>
@@ -452,7 +450,6 @@ if ($_SESSION['currentSession'] != 1 ) {
                                         <td style="display:none;"><?php echo $data["id"];?></td>
                                         <td><?php echo $data["first name"].' '.$data["last name"];?></td>
                                         <td><?php echo $data["email"];?></td>
-                                        <td><?php echo $data["password"];?></td>
                                         <td><?php if($data["role"]=='1'){
                                             echo 'admin';
                                         }elseif($data["role"]=='2'){
