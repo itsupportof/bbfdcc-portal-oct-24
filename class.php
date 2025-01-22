@@ -408,7 +408,6 @@ if ($_SESSION['currentSession'] != 1 ) {
             $stmt = $pdo->prepare($query);
             $stmt->execute();
             $row   = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            var_dump($row);
         } catch (PDOException $e) {
             echo "Error : ".$e->getMessage();
         }
