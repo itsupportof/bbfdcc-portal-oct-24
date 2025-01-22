@@ -120,11 +120,10 @@ require 'lib.php';
                         },
                         success: function(data){
                             alert(data);
-                            var a = data.includes("Success");
-                            if (a) {
+                            if (data.includes("Success")) {
                                 $("#messageblock").css("display","block");
                                 $('#msg').html(data);
-                                $('#registrationform').find('input').val('')
+                                $('#registrationform').find('input').val('');
                             } else {
                                 $("#errorblock").css("display","block");
                                 $('#errormsg').html(data);
