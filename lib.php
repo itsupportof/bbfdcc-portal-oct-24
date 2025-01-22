@@ -69,8 +69,9 @@ function loginlogic() {
             $stmt->execute();
             $row   = $stmt->fetch(PDO::FETCH_ASSOC);
             $count = $stmt->rowCount();
-            // echo var_dump($row);
-            $name=$row['first name'].' '.$row['last name'];
+            echo var_dump($row);
+            exit(0);
+            //$name=$row['first name'].' '.$row['last name'];
 
             if($count == 1 && !empty($row)) {
                 if($row['verified']==0){
