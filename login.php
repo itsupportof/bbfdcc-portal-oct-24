@@ -30,7 +30,62 @@ require 'lib.php';
 
     <!-- Custom styles for this template-->
     <link href="css/sb-admin-2.min.css" rel="stylesheet">
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('#registrationform').submit(function(e) {
+                e.preventDefault();
+                $("#errorblock").css("display","none");
+                $("#messageblock").css("display","none");
+                var email = $('#Email').val();
+                var password = $('#Password').val();
+                var EmailregEx = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+                var errorCount=0;
+                $(".error").remove();
+                if (email.length < 1) {
+                    $('#Email').after('<div class="error" style="padding-top:10px;margin:0px;"><p style="color:red; font-size:12px;margin:0px;">This field is required</p></div>');
+                    errorCount++;
+                } else {
 
+                    var validEmail = EmailregEx.test(email);
+                    if (!validEmail) {
+                        $('#Email').after('<div class="error" style="padding-top:10px;"margin:0px;><p class="error" style="color:red; font-size:12px;margin:0px;">Enter a valid email</p></div>');
+                        errorCount++;
+                    }
+                }
+                if (password.length < 0 ) {
+                    $('#passworderror').append('<div class="error" style="padding-top:10px;margin:0px;margin:0px;"><p class="error" style="color:red; font-size:12px;">Password cannot be empty</p></div>');
+                    errorCount++;
+                }
+
+                if(errorCount==0){
+                    $.ajax({
+                        url: "lib.php",
+                        type: "POST",
+                        data: {
+                            Email: email,
+                            Password: password,
+                            loginProcess:1
+                        },
+                        success: function(data){
+                            alert(data);
+                            if (data.includes("Success")) {
+                                $("#messageblock").css("display","block");
+                                $('#msg').html(data);
+                                $('#registrationform').find('input').val('');
+                            } else {
+                                $("#errorblock").css("display","block");
+                                $('#errormsg').html(data);
+                            }
+
+
+                        }
+                    });
+
+                }
+            });
+
+        });
+    </script>
 </head>
 
 <body class="bg-gradient-primary">

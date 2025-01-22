@@ -15,7 +15,7 @@ global $pdo;
  * Calling function according to the requirement to speed up
  * ****************************************
  */
-if(isset($_POST['submitBtnLogin'])) {
+if(isset($_POST['loginProcess'])) {
     loginlogic();
 }elseif(isset($_POST['registerationProcess'])){
     registerationlogic();
@@ -54,7 +54,8 @@ else if(isset($_POST['page'])&& $_POST['page']=='getCalenderDetails'){
 function loginlogic() {
     //include ("config.php");
     global $pdo;
-    
+    var_dump($_POST);
+    exit();
     $msg = "";
     $username = trim($_POST['username']);
     $password = md5(trim($_POST['password']));
@@ -164,7 +165,7 @@ function registerationlogic(){
             $stmt->bindParam('role', $_POST['Role'], PDO::PARAM_STR);
             $stmt->bindParam('verified', $verified, PDO::PARAM_STR);
             $stmt->execute();
-            echo 'Success: Contact your admin to approve your request!';
+            echo 'Success: Contact office to approve your request!';
         }else{
             echo 'Error: Email Already Registered!';
         }
