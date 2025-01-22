@@ -59,9 +59,6 @@ function loginlogic() {
     $msg = "";
     $username = trim($_POST['Email']);
     $password = md5(trim($_POST['Password']));
-    echo $username;
-    echo $password;
-    exit(0);
     if($username != "" && $password != "") {
         try {
             $query = "select * from `user` where `email`=:username and `password`=:password";
@@ -72,12 +69,11 @@ function loginlogic() {
             $row   = $stmt->fetch(PDO::FETCH_ASSOC);
             $count = $stmt->rowCount();
             // echo var_dump($row);
-            $name=$row['first name'].' '.$row['last name'];
-
             if($count == 1 && !empty($row)) {
                 if($row['verified']==0){
                     $msg = "Your account is not approved by admin. Please contact your admin to get it approved!";
                 }else{
+                    $name=$row['first name'].' '.$row['last name'];
                     $userId=$row["id"];
                     if (!isset($_SESSION)) {
                         session_start();
@@ -101,10 +97,8 @@ function loginlogic() {
         }
     } else {
         $msg = "Both fields are required!";
-    
-        // var_dump($msg);
-        //             exit(0);
     }
+    echo $msg;
 }
 /*****************************************
  * Register Student
