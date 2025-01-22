@@ -32,7 +32,7 @@ require 'lib.php';
     <link href="css/sb-admin-2.min.css" rel="stylesheet">
     <script src="vendor/jquery/jquery.min.js"></script>
     <script type="text/javascript">
-        alert('m here 1');
+        //alert('m here 1');
         $(document).ready(function() {
            // alert('m here 1');
             $('#loginform').submit(function(e) {
