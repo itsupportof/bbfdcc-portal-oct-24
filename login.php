@@ -34,7 +34,7 @@ require 'lib.php';
     <script type="text/javascript">
         alert('m here 1');
         $(document).ready(function() {
-            alert('m here 1');
+           // alert('m here 1');
             $('#loginform').submit(function(e) {
                 //alert('m hereads');
                 e.preventDefault();
