@@ -451,7 +451,7 @@ if ($_SESSION['currentSession'] != 1 ) {
                                     ?>
                                     <tr>
                                         <td style="display:none;"><?php echo $data["id"];?></td>
-                                        <td><?php echo $data["name"];?></td>
+                                        <td><?php echo $data["first name"].' '.["last name"];?></td>
                                         <td><?php echo $data["email"];?></td>
                                         <td><?php echo $data["password"];?></td>
                                         <td><?php if($data["role"]=='1'){
