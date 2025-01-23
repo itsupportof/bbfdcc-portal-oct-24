@@ -160,7 +160,7 @@ function registerationlogic(){
             // error_reporting(E_ALL);
             // exit(0);
             /***Insert Query***/
-            $query  = "INSERT INTO `user` ( `first name`, `last name`, `email`, `password`, `role`, `verified`) VALUES (:firstname, :lastname, :email, :password, :role, :verified)";
+            $query  = "INSERT INTO `user` ( `first name`, `last name`, `email`, `password`, `role`, `verified`,`newuser`) VALUES (:firstname, :lastname, :email, :password, :role, :verified,1)";
             $stmt = $pdo->prepare($query);
             $stmt->bindParam('firstname', $FirstName, PDO::PARAM_STR);
             $stmt->bindParam('lastname', $LastName, PDO::PARAM_STR);
