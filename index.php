@@ -88,7 +88,7 @@ if(!isset($_GET['page']) && isset($_SESSION['currentSession'])){
                 <ul class="navbar-nav ml-auto">
                     <div class="topbar-divider d-none d-sm-block"></div>
                     
-                    <!-- Nav Item - User Information -->
+                    <!-- Nav Item - User Information and notification -->
                     <?php 
                     notificationBar();
                     $b=userOption();echo $b;?>

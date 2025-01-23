@@ -78,6 +78,14 @@ function loginlogic() {
                     if (!isset($_SESSION)) {
                         session_start();
                     }
+                    if($row["role"]==1){
+                        $newquery = "select newuser from `user` where `newuser`=1";
+                        $newstmt = $pdo->prepare($newquery);
+                        $newstmt->execute();
+                        $newrow   = $newstmt->fetchAll(PDO::FETCH_ASSOC);
+                        $newcount = $newstmt->rowCount();
+                        $_SESSION['newusers']=$newcount;
+                    }
                     $_SESSION['currentSession']=1;
                     $_SESSION['role']=$row["role"];
                     $_SESSION['userid']=$row ["id"];
@@ -294,7 +302,7 @@ function notificationBar(){
                             <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                                 <i class="fas fa-bell fa-fw"></i>
                                 <!-- Counter - Alerts -->
-                                <span class="badge badge-danger badge-counter">1</span>
+                                <span class="badge badge-danger badge-counter"><?php echo  $_SESSION['newusers'];?></span>
                             </a>
                             <!-- Dropdown - Alerts -->
                             <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="alertsDropdown">
