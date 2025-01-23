@@ -310,7 +310,7 @@ function notificationBar(){
                                     Alerts Center
                                 </h6>
                                 <?php if($_SESSION['newusers'] !=0){?>
-                                <a class="dropdown-item d-flex align-items-center" href="/?page=pendingUsers">
+                                <a class="dropdown-item d-flex align-items-center" href="./?page=pendingUsers">
                                     <div class="mr-3">
                                         <div class="icon-circle bg-success">
                                             <i class="fas fa-user text-white"></i>
