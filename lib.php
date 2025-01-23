@@ -301,8 +301,10 @@ function notificationBar(){
 <li class="nav-item dropdown no-arrow mx-1">
                             <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                                 <i class="fas fa-bell fa-fw"></i>
+                                <?php if($_SESSION['newusers']!=0){?>
                                 <!-- Counter - Alerts -->
                                 <span class="badge badge-danger badge-counter"><?php echo  $_SESSION['newusers'];?></span>
+                                <?php }  ?>
                             </a>
                             <!-- Dropdown - Alerts -->
                             <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="alertsDropdown">
