@@ -316,7 +316,7 @@ function notificationBar(){
                                         </div>
                                     </div>
                                     <div>
-                                        New Users have signed up!
+                                    <?php echo  $_SESSION['newusers'];?> New Users have signed up!
                                     </div>
                                 </a>
                             </div>
