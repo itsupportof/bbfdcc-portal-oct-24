@@ -84,7 +84,7 @@ function loginlogic() {
                         $newstmt->execute();
                         $newrow   = $newstmt->fetchAll(PDO::FETCH_ASSOC);
                         $newcount = $newstmt->rowCount();
-                        $_SESSION['newusers']=0;
+                        $_SESSION['newusers']=$newcount;
                     }
                     $_SESSION['currentSession']=1;
                     $_SESSION['role']=$row["role"];
@@ -322,7 +322,19 @@ function notificationBar(){
                                 </a>
                                 <?php
                                 }else{
-                                    echo "You're caught up with everthing!";
+                                    ?>
+                                    <a class="dropdown-item d-flex align-items-center" href="#">
+                                    <div class="mr-3">
+                                        <div class="icon-circle bg-success">
+                                            <i class="fas fa-check text-white"></i>
+                                        </div>
+                                    </div>
+                                    <div>
+                                    You're caught up with everything!
+                                    </div>
+                                </a>
+
+                                <?php
                                 }
                                 ?>
                             </div>
