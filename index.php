@@ -87,7 +87,7 @@ if(!isset($_GET['page']) && isset($_SESSION['currentSession'])){
                 <!-- Topbar Navbar -->
                 <ul class="navbar-nav ml-auto">
                     <div class="topbar-divider d-none d-sm-block"></div>
-                    <li class="nav-item dropdown no-arrow mx-1 hide">
+                    <li class="nav-item dropdown no-arrow mx-1">
                             <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                                 <i class="fas fa-bell fa-fw"></i>
                                 <!-- Counter - Alerts -->
