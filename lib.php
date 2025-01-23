@@ -306,15 +306,17 @@ function notificationBar(){
                             </a>
                             <!-- Dropdown - Alerts -->
                             <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="alertsDropdown">
-                                
-                                <a class="dropdown-item d-flex align-items-center" href="#">
+                                <h6 class="dropdown-header">
+                                    Alerts Center
+                                </h6>
+                                <a class="dropdown-item d-flex align-items-center" href="/?page=pendingUsers">
                                     <div class="mr-3">
                                         <div class="icon-circle bg-success">
                                             <i class="fas fa-user text-white"></i>
                                         </div>
                                     </div>
                                     <div>
-                                        <a href="/?page=pendingUsers"><?php echo  $_SESSION['newusers'];?> New Users have signed up!</a>
+                                        New Users have signed up!
                                     </div>
                                 </a>
                             </div>
