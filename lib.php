@@ -84,7 +84,7 @@ function loginlogic() {
                         $newstmt->execute();
                         $newrow   = $newstmt->fetchAll(PDO::FETCH_ASSOC);
                         $newcount = $newstmt->rowCount();
-                        $_SESSION['newusers']=$newcount;
+                        $_SESSION['newusers']=0;
                     }
                     $_SESSION['currentSession']=1;
                     $_SESSION['role']=$row["role"];
@@ -309,6 +309,7 @@ function notificationBar(){
                                 <h6 class="dropdown-header">
                                     Alerts Center
                                 </h6>
+                                <?php if($_SESSION['newusers'] !=0){?>
                                 <a class="dropdown-item d-flex align-items-center" href="/?page=pendingUsers">
                                     <div class="mr-3">
                                         <div class="icon-circle bg-success">
@@ -316,9 +317,14 @@ function notificationBar(){
                                         </div>
                                     </div>
                                     <div>
-                                    <?php echo  $_SESSION['newusers'];?> New Users have signed up!
+                                    <?php echo  $_SESSION['newusers'];?> New Users are still pending!
                                     </div>
                                 </a>
+                                <?php
+                                }else{
+                                    echo "You're caught up with everthing!";
+                                }
+                                ?>
                             </div>
                     </li>
 
