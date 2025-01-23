@@ -459,9 +459,10 @@ if ($_SESSION['currentSession'] != 1 ) {
                                         } ?></td>
 
                                         <td>
-                                            <a href="?page=acceptUser&user=<?php echo $data["id"];?>" class="btn btn-success btn-circle btn-md" id="accept<?php echo $data["id"];?>">
+                                            <a href="javascript:void(0);" onclick="confirmAccept(<?php echo $data['id']; ?>)" class="btn btn-success btn-circle btn-md" id="accept<?php echo $data["id"];?>">
                                                 <i class="fas fa-check"></i>
                                             </a>
+
                                             <a href="?page=editUser&user=<?php echo $data["id"];?>" class="btn btn-primary btn-circle btn-md" id="edit<?php echo $data["id"];?>">
                                                 <i class="fas fa-edit"></i>
                                             </a>
@@ -488,6 +489,22 @@ if ($_SESSION['currentSession'] != 1 ) {
                                         if (result.isConfirmed) {
                                             // Redirect to the deletion URL
                                             window.location.href = `?page=deleteUser&source=pendingUser&user=${meetingID}`;
+                                        }
+                                    });
+                                }
+                                function confirmAccept(meetingID) {
+                                    Swal.fire({
+                                        title: 'Are you sure?',
+                                        text: "You won't be able to revert this!",
+                                        icon: 'success',
+                                        showCancelButton: true,
+                                        confirmButtonColor: '#3bdd33',
+                                        cancelButtonColor: '#3085d6',
+                                        confirmButtonText: 'Yes, Accept the user!'
+                                    }).then((result) => {
+                                        if (result.isConfirmed) {
+                                            // Redirect to the deletion URL
+                                            window.location.href = `?page=acceptUser&user=${meetingID}`;
                                         }
                                     });
                                 }
