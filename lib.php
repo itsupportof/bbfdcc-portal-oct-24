@@ -131,7 +131,7 @@ function registerationlogic(){
         $stmt->execute();
         $count = $stmt->rowCount();
         if ($count!=1) {
-            $query  = "INSERT INTO `user` ( `first name`, `last name`, `email`, `password`, `role`, `verified`) VALUES (:firstname, :lastname, :email, :password, :role, :verified)";
+            $query  = "INSERT INTO `user` ( `first name`, `last name`, `email`, `password`, `role`, `verified`,`newuser`) VALUES (:firstname, :lastname, :email, :password, :role, :verified,0)";
             $stmt = $pdo->prepare($query);
             $stmt->bindParam('firstname', $FirstName, PDO::PARAM_STR);
             $stmt->bindParam('lastname', $LastName, PDO::PARAM_STR);
