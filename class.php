@@ -2086,7 +2086,7 @@ class Meeting{
                     <div class="card-body">
                         <h3>Agenda:</h3>
                         <p>
-                            <?php //echo $row["agenda"];?>
+                            <?php echo $row["agenda"];?>
                         </p>
                         <?php //var_dump($row)?>
                         <h3>Resources:</h3>
