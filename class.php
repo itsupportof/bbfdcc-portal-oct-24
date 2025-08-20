@@ -2088,7 +2088,7 @@ class Meeting{
                         <p>
                             <?php //echo $row["agenda"];?>
                         </p>
-                        <?php var_dump($row)?>
+                        <?php //var_dump($row)?>
                         <h3>Resources:</h3>
                         
                         <?php
