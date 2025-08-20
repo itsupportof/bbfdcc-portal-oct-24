@@ -2086,19 +2086,22 @@ class Meeting{
                     <div class="card-body">
                         <h3>Agenda:</h3>
                         <p>
-                            <?php echo $row["agenda"];?>
+                            <?php //echo $row["agenda"];?>
                         </p>
                         <?php var_dump($row)?>
                         <h3>Resources:</h3>
-
+                        
                         <?php
                        // var_dump($files);
-                        $lastIndex = array_key_last($files);
+                       if($files){
+                            $lastIndex = array_key_last($files);
+                       }
+                        
                         //echo" This is:".$lastIndex;
                         //var_dump($last);
                         //echo"<br/>";
                         
-                        if(isset($links)&&isset($links)&&!empty($links)){
+                        if(isset($links)&&isset($links)){
                            
                             $linkTitleCount=1;
                             $countFiles=0;
@@ -2123,7 +2126,7 @@ class Meeting{
                             }
                             
                         }
-                        elseif(isset($links)&&!empty($links)){
+                        elseif(isset($links)){
                             $linkTitleCount=1;
                             foreach($links as $key=>$value ) {
                                 ?>
@@ -2134,7 +2137,7 @@ class Meeting{
                             }
                         }
                         
-                        elseif(isset($files)&&!empty($files)){
+                        elseif(isset($files)){
                             for ($j=1; $j <$countFiles+1 ; $j++) {
                                 ?>
                                 <a href="?page=viewResource&res=<?php echo $files[$j];?>&mtid=<?php echo $meetingId;?>" target="_blank"><i class="fa fa-file"></i><span style="color: black"> &nbsp;<?php echo $titles[$j]; ?></span></a><br>
