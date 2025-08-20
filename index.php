@@ -90,11 +90,8 @@ if(!isset($_GET['page']) && isset($_SESSION['currentSession'])){
                     
                     <!-- Nav Item - User Information and notification -->
                     <?php 
-                    if($role==1 || $role==2
-                    {notificationBar();}
-                    
-                    $b=userOption();echo $b;
-                    ?>
+                    notificationBar();
+                    $b=userOption();echo $b;?>
 
                 </ul>
 
