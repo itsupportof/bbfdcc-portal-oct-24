@@ -2093,7 +2093,7 @@ class Meeting{
                         
                         <?php
                        // var_dump($files);
-                       if($files){
+                       if(isset($files)){
                             $lastIndex = array_key_last($files);
                        }
                         
