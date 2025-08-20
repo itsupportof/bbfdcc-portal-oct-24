@@ -2090,6 +2090,7 @@ class Meeting{
                         </p>
                         <?php var_dump($row)?>
                         <h3>Resources:</h3>
+
                         <?php
                        // var_dump($files);
                         $lastIndex = array_key_last($files);
@@ -2097,7 +2098,7 @@ class Meeting{
                         //var_dump($last);
                         //echo"<br/>";
                         
-                        if(isset($links)&&isset($links)){
+                        if(isset($links)&&isset($links)&&!empty($links)){
                            
                             $linkTitleCount=1;
                             $countFiles=0;
@@ -2122,7 +2123,7 @@ class Meeting{
                             }
                             
                         }
-                        elseif(isset($links)){
+                        elseif(isset($links)&&!empty($links)){
                             $linkTitleCount=1;
                             foreach($links as $key=>$value ) {
                                 ?>
@@ -2133,7 +2134,7 @@ class Meeting{
                             }
                         }
                         
-                        elseif(isset($files)){
+                        elseif(isset($files)&&!empty($files)){
                             for ($j=1; $j <$countFiles+1 ; $j++) {
                                 ?>
                                 <a href="?page=viewResource&res=<?php echo $files[$j];?>&mtid=<?php echo $meetingId;?>" target="_blank"><i class="fa fa-file"></i><span style="color: black"> &nbsp;<?php echo $titles[$j]; ?></span></a><br>
