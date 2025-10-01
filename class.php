@@ -2810,29 +2810,25 @@ class Meeting{
             echo "Error : ".$e->getMessage();
         }
         if($row["files"]){
-                echo "not empty";
-        }else{
-            echo "empty";
-        }
-
-        var_dump($row);
-        exit(0);
-        $files=unserialize($row["files"]);
-        if($row["files"]!="N;"){
-            $countFiles=count($files);
-        }else{
-            $countFiles=0;
-        }
-        if($countFiles!=0){
+            $files=unserialize($row["files"]);
+            if($row["files"]!="N;"){
+                $countFiles=count($files);
+            }else{
+                $countFiles=0;
+            }
             if($countFiles!=0){
-                for ($j=1; $j <$countFiles+1 ; $j++) {
-                    if (file_exists("books/".$files[$j])){
-                        unlink("books/".$files[$j]);
+                if($countFiles!=0){
+                    for ($j=1; $j <$countFiles+1 ; $j++) {
+                        if (file_exists("books/".$files[$j])){
+                            unlink("books/".$files[$j]);
+                        }
                     }
                 }
             }
         }
-
+        // var_dump($row);
+        // exit(0);
+        
         try {
             $sql = "Delete from `meetings` WHERE id=?";
             $stmt= $pdo->prepare($sql);
