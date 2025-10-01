@@ -2809,6 +2809,8 @@ class Meeting{
         } catch (PDOException $e) {
             echo "Error : ".$e->getMessage();
         }
+        var_dump($row);
+        exit(0);
         $files=unserialize($row["files"]);
         if($row["files"]!="N;"){
             $countFiles=count($files);
