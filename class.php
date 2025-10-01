@@ -2809,6 +2809,12 @@ class Meeting{
         } catch (PDOException $e) {
             echo "Error : ".$e->getMessage();
         }
+        if($row["files"]){
+                echo "not empty";
+        }else{
+            echo "empty";
+        }
+
         var_dump($row);
         exit(0);
         $files=unserialize($row["files"]);
