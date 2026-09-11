@@ -1120,6 +1120,76 @@ if ($_SESSION['currentSession'] != 1 ) {
         <?php
     }
 
+    /*****************************************
+     * Security: require ALL users to set a new password + email them
+     * ****************************************
+     */
+    public function requirePasswordResetAll(){
+        global $pdo;
+        $count = 0;
+        try {
+            $count = (int)$pdo->query("SELECT COUNT(*) FROM `user`")->fetchColumn();
+        } catch (PDOException $e) {
+            error_log('requirePasswordResetAll count: ' . $e->getMessage());
+        }
+        ?>
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-danger">Require All Users To Reset Their Password</h6>
+            </div>
+            <div class="card-body">
+                <p>This will flag <strong><?php echo $count; ?></strong> user account(s) so that each person must
+                   set a new password the next time they log in, and it will email everyone a notice explaining what to do.</p>
+                <ul>
+                    <li>Users can still log in with their current password &mdash; they will simply be asked to choose a new one before continuing.</li>
+                    <li>Anyone who cannot log in is told to use the <strong>Forgot Password</strong> link.</li>
+                    <li>Your own current session is not interrupted; you will be prompted at your next login.</li>
+                </ul>
+                <div class="alert alert-warning">Sending a large number of emails at once may be limited by the mail server. If some notices don't send, you can run this again later.</div>
+                <form action="index.php?page=securityResetAllProcess" method="post" onsubmit="return confirm('Require ALL users to reset their password and email them now?');">
+                    <button type="submit" class="btn btn-danger"><i class="fas fa-shield-alt"></i> Require reset &amp; email all users</button>
+                    <a href="?page=currentUsers" class="btn btn-secondary">Cancel</a>
+                </form>
+            </div>
+        </div>
+        <?php
+    }
+
+    public function processRequirePasswordResetAll(){
+        global $pdo;
+        @set_time_limit(0);
+        echo '<h1 class="h3 mb-4 text-gray-800">Password Reset Campaign &mdash; Results</h1>';
+        try {
+            $pdo->exec("UPDATE `user` SET must_change_password = 1");
+        } catch (PDOException $e) {
+            error_log('processRequirePasswordResetAll update: ' . $e->getMessage());
+            echo '<div class="alert alert-danger">Could not flag users. Please try again.</div>';
+            return;
+        }
+        $sent = 0; $failed = 0; $failedList = array();
+        try {
+            $stmt = $pdo->query("SELECT `email`, `first name` AS fn, `last name` AS ln FROM `user`");
+            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                $email = trim($row['email']);
+                if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) { $failed++; $failedList[] = $email; continue; }
+                $name = trim($row['fn'] . ' ' . $row['ln']);
+                if (sendPasswordResetNoticeEmail($email, $name)) { $sent++; }
+                else { $failed++; $failedList[] = $email; }
+            }
+        } catch (PDOException $e) {
+            error_log('processRequirePasswordResetAll select: ' . $e->getMessage());
+        }
+        echo '<div class="alert alert-success">All users have been flagged to set a new password on next login.</div>';
+        echo '<div class="alert alert-info"><strong>' . $sent . '</strong> notice email(s) sent, '
+           . '<strong>' . $failed . '</strong> could not be sent.</div>';
+        if (!empty($failedList)) {
+            echo '<div class="card shadow mb-4"><div class="card-header py-3"><h6 class="m-0 font-weight-bold text-danger">Emails not sent</h6></div><div class="card-body"><ul>';
+            foreach ($failedList as $fe) { echo '<li>' . htmlspecialchars($fe === '' ? '(blank email)' : $fe) . '</li>'; }
+            echo '</ul></div></div>';
+        }
+        echo '<a href="?page=currentUsers" class="btn btn-primary">Back to users</a>';
+    }
+
 }
 
 

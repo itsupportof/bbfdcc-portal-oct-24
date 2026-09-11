@@ -127,6 +127,30 @@ function sendAccountCreatedEmail($email, $name, $tempPassword){
     return @mail($email, $subject, $txt, $headers);
 }
 
+/** Email an existing user asking them to set a new password (security refresh). */
+function sendPasswordResetNoticeEmail($email, $name){
+    $url = "https://www.brightbeginningsfdcc.com.au/portal";
+    $subject = "[Bright Beginnings Family Day Care] Please set a new password";
+    $txt  = '<html><body>';
+    $txt .= '<p>Dear ' . htmlspecialchars($name) . ',</p>';
+    $txt .= '<p>As part of a security upgrade to the Bright Beginnings Family Day Care portal, '
+          . 'we are asking all users to set a new password.</p>';
+    $txt .= '<p><strong>What to do:</strong></p>';
+    $txt .= '<ul>';
+    $txt .= '<li>Go to the portal login page: <a href="' . $url . '/login.php">' . $url . '/login.php</a></li>';
+    $txt .= '<li>Log in as usual &mdash; you will then be prompted to choose a new password.</li>';
+    $txt .= '<li>If you are unable to log in, click <strong>&ldquo;Forgot Password&rdquo;</strong> on the login page to reset it.</li>';
+    $txt .= '</ul>';
+    $txt .= '<p>Your new password must be at least 8 characters and include an uppercase letter, '
+          . 'a lowercase letter, a number and a special character.</p>';
+    $txt .= '<p>Thanks,<br>Bright Beginnings Family Day Care Team</p>';
+    $txt .= '</body></html>';
+    $headers  = "MIME-Version: 1.0\r\n";
+    $headers .= "Content-type: text/html; charset=UTF-8\r\n";
+    $headers .= "From: Bright Beginnings Family Day Care <noreply@brightbeginningsfdcc.com.au>\r\n";
+    return @mail($email, $subject, $txt, $headers);
+}
+
 /** Handle the forced first-login password change (posted from the change-password form). */
 function changePasswordFirstLogin(){
     global $pdo;
