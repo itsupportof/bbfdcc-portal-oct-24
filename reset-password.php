@@ -55,7 +55,37 @@ if ($count2 == 0 || $row3['token'] != $_GET['key']) {
     </style>
     <script src="js/jquery-3.6.0.min.js"></script>
     <script type="text/javascript">
+        // ---- Password policy (keep in sync with validatePassword() in lib.php) ----
+        function passwordRules(pw){
+            return {
+                len: pw.length >= 8 && pw.length <= 72,
+                upper: /[A-Z]/.test(pw),
+                lower: /[a-z]/.test(pw),
+                num: /[0-9]/.test(pw),
+                special: /[^A-Za-z0-9]/.test(pw)
+            };
+        }
+        function passwordPolicyError(pw){
+            var r = passwordRules(pw);
+            if (pw.length < 8)  return "Password must be at least 8 characters long.";
+            if (pw.length > 72) return "Password must be at most 72 characters long.";
+            if (!r.upper)   return "Password must include at least one uppercase letter (A-Z).";
+            if (!r.lower)   return "Password must include at least one lowercase letter (a-z).";
+            if (!r.num)     return "Password must include at least one number (0-9).";
+            if (!r.special) return "Password must include at least one special character (e.g. ! @ # $ %).";
+            return "";
+        }
+        function updatePwChecklist(pw){
+            var r = passwordRules(pw);
+            Object.keys(r).forEach(function(k){
+                var el = document.querySelector('#pwreq li[data-rule="'+k+'"]');
+                if(!el) return;
+                el.style.color = r[k] ? '#1cc88a' : '#888';
+                el.querySelector('.mark').textContent = r[k] ? '✓' : '○';
+            });
+        }
         $(document).ready(function() {
+            $('#Password').on('keyup input', function(){ updatePwChecklist($(this).val()); });
 
             $('#updationform').submit(function(e) {
                 e.preventDefault();
@@ -69,11 +99,12 @@ if ($count2 == 0 || $row3['token'] != $_GET['key']) {
 
                 $(".error").remove();
 
-                if (password.length < 8 ) {
-                    $('#passworderror').append('<div class="error" style="padding-top:10px;margin:0px;margin:0px;"><p class="error" style="color:red; font-size:12px;">Password must be at least 8 characters</p></div>');
+                var pwErr = passwordPolicyError(password);
+                if (pwErr) {
+                    $('#passworderror').append('<div class="error" style="padding-top:10px;margin:0px;"><p class="error" style="color:red; font-size:12px;">'+pwErr+'</p></div>');
                     errorCount++;
                 }else if(password!=repeatPassword){
-                    $('#passworderror').append('<div class="error" style="padding-top:10px;margin:0px;margin:0px;"><p class="error" style="color:red; font-size:12px;">Try again. Password does not match.</p></div>');
+                    $('#passworderror').append('<div class="error" style="padding-top:10px;margin:0px;"><p class="error" style="color:red; font-size:12px;">Try again. Passwords do not match.</p></div>');
                     errorCount++;
                 }
 
@@ -165,6 +196,16 @@ if ($count2 == 0 || $row3['token'] != $_GET['key']) {
                                                 </div>
                                             </div>
                                             <div id="passworderror" style="margin-left: 20px;">
+                                            </div>
+                                            <div id="pwreq" style="font-size:12px; color:#888; margin: 8px 0 0 20px;">
+                                                <div style="margin-bottom:4px;">Your password must include:</div>
+                                                <ul style="list-style:none; padding-left:0; margin:0;">
+                                                    <li data-rule="len"><span class="mark">○</span> At least 8 characters</li>
+                                                    <li data-rule="upper"><span class="mark">○</span> One uppercase letter (A&ndash;Z)</li>
+                                                    <li data-rule="lower"><span class="mark">○</span> One lowercase letter (a&ndash;z)</li>
+                                                    <li data-rule="num"><span class="mark">○</span> One number (0&ndash;9)</li>
+                                                    <li data-rule="special"><span class="mark">○</span> One special character (! @ # $ % &hellip;)</li>
+                                                </ul>
                                             </div>
                                         </div>
                                         <div class="form-footer">

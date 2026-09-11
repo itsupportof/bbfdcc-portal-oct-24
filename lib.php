@@ -58,6 +58,23 @@ function hashPassword($plain) {
 }
 
 /**
+ * Validate a plaintext password against the portal's password policy.
+ * Returns an empty string when valid, or a human-readable error message.
+ * Keep the rules in sync with the client-side checks on the register /
+ * reset-password pages.
+ */
+function validatePassword($pw){
+    $pw = (string)$pw;
+    if (strlen($pw) < 8)                return "Password must be at least 8 characters long.";
+    if (strlen($pw) > 72)              return "Password must be at most 72 characters long.";
+    if (!preg_match('/[A-Z]/', $pw))   return "Password must include at least one uppercase letter (A-Z).";
+    if (!preg_match('/[a-z]/', $pw))   return "Password must include at least one lowercase letter (a-z).";
+    if (!preg_match('/[0-9]/', $pw))   return "Password must include at least one number (0-9).";
+    if (!preg_match('/[^A-Za-z0-9]/', $pw)) return "Password must include at least one special character (e.g. !@#\$%).";
+    return "";
+}
+
+/**
  * Verify a plaintext password against a stored hash.
  * If the stored hash is a legacy 32-char MD5 and matches, it is transparently
  * re-hashed to bcrypt and saved (when $userId is provided).
@@ -230,6 +247,8 @@ function registerationlogic(){
     $LastName = $_POST['LastName'];
     $Email = $_POST['Email'];
     $Password= $_POST['Password'];
+    $pwError = validatePassword($Password);
+    if ($pwError !== "") { echo "Error: " . $pwError; return; }
     $verified=0;
     $Password=hashPassword($Password);
     $role=$_POST['role'];
@@ -388,6 +407,8 @@ your account and change your security password as someone may have guessed it.</
 function resetPasword(){
     global $pdo;
     $plainPassword = $_POST['Password'];
+    $pwError = validatePassword($plainPassword);
+    if ($pwError !== "") { echo $pwError; return; }
     $query2 = "SELECT * FROM  `user` WHERE email=:email";
     $stmt2 = $pdo->prepare($query2);
     $stmt2->bindParam('email', $_POST['resetPassEmail'], PDO::PARAM_STR);
@@ -952,7 +973,6 @@ function updateUser(){
     $Email = $_POST['Email'];
     $Password= $_POST['Password'];
     $role=$_POST['Role'];
-    $Password=hashPassword($Password);
 
 
 
@@ -968,6 +988,9 @@ function updateUser(){
         $stmt = $pdo->prepare($query);
         $stmt->execute($data);
     }else{
+        $pwError = validatePassword($Password);
+        if ($pwError !== "") { echo "Error: " . $pwError; return; }
+        $Password = hashPassword($Password);
         $data = [
                 'firstname'=>$FirstName,
                 'lastname'=>$LastName,
@@ -995,6 +1018,8 @@ function addNewUser(){
     $LastName = $_POST['LastName'];
     $Email = $_POST['Email'];
     $Password= $_POST['Password'];
+    $pwError = validatePassword($Password);
+    if ($pwError !== "") { echo "Error: " . $pwError; return; }
     $Password=hashPassword($Password);
     $verified=1;
     $role=$_POST['Role'];
