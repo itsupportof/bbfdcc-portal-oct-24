@@ -8,3 +8,15 @@ $DB_HOST = 'localhost';
 $DB_NAME = 'your_database_name';
 $DB_USER = 'your_database_user';
 $DB_PASS = 'your_database_password';
+
+/**
+ * SMTP settings for reliable email delivery (optional).
+ * If left blank, the portal falls back to PHP mail().
+ */
+$SMTP_HOST       = 'brightbeginningsfdcc.com.au';        // outgoing (SMTP) server
+$SMTP_PORT       = 465;                                   // 465 = SSL, 587 = TLS
+$SMTP_USER       = 'noreply@brightbeginningsfdcc.com.au'; // full mailbox address
+$SMTP_PASS       = 'your_mailbox_password';               // the mailbox password
+$SMTP_SECURE     = 'ssl';                                 // 'ssl' for 465, 'tls' for 587
+$MAIL_FROM_EMAIL = 'noreply@brightbeginningsfdcc.com.au';
+$MAIL_FROM_NAME  = 'Bright Beginnings Family Day Care';

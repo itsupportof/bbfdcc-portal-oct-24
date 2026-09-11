@@ -106,6 +106,101 @@ function mapRoleName($raw){
     return null;
 }
 
+/**
+ * Send an HTML email. Uses authenticated SMTP when configured (config.local.php),
+ * otherwise falls back to PHP mail(). Returns true on success.
+ */
+function sendMail($to, $subject, $htmlBody){
+    if (defined('SMTP_HOST') && SMTP_HOST !== '' && defined('SMTP_USER') && SMTP_USER !== '' && defined('SMTP_PASS') && SMTP_PASS !== '') {
+        if (smtpSend($to, $subject, $htmlBody)) {
+            return true;
+        }
+        error_log('sendMail: SMTP send failed, falling back to mail() for ' . $to);
+    }
+    $fromEmail = defined('MAIL_FROM_EMAIL') ? MAIL_FROM_EMAIL : 'noreply@brightbeginningsfdcc.com.au';
+    $fromName  = defined('MAIL_FROM_NAME')  ? MAIL_FROM_NAME  : 'Bright Beginnings Family Day Care';
+    $headers  = "MIME-Version: 1.0\r\n";
+    $headers .= "Content-type: text/html; charset=UTF-8\r\n";
+    $headers .= "From: " . $fromName . " <" . $fromEmail . ">\r\n";
+    return @mail($to, $subject, $htmlBody, $headers);
+}
+
+/**
+ * Minimal authenticated SMTP client (AUTH LOGIN). Supports implicit SSL (port 465)
+ * and STARTTLS (port 587). Returns true if the server accepted the message.
+ */
+function smtpSend($to, $subject, $htmlBody){
+    $host      = SMTP_HOST;
+    $port      = (int)SMTP_PORT;
+    $user      = SMTP_USER;
+    $pass      = SMTP_PASS;
+    $secure    = strtolower(SMTP_SECURE);
+    $fromEmail = MAIL_FROM_EMAIL;
+    $fromName  = MAIL_FROM_NAME;
+
+    $transport = ($secure === 'ssl') ? 'ssl://' : '';
+    $context = stream_context_create(array('ssl' => array(
+        'verify_peer'       => false,
+        'verify_peer_name'  => false,
+        'allow_self_signed' => true,
+    )));
+    $errno = 0; $errstr = '';
+    $fp = @stream_socket_client($transport . $host . ':' . $port, $errno, $errstr, 15, STREAM_CLIENT_CONNECT, $context);
+    if (!$fp) { error_log("SMTP connect failed: $errstr ($errno)"); return false; }
+    stream_set_timeout($fp, 15);
+
+    $read = function () use ($fp) {
+        $data = '';
+        while (($line = fgets($fp, 515)) !== false) {
+            $data .= $line;
+            if (isset($line[3]) && $line[3] === ' ') break; // final line of a (possibly multiline) reply
+        }
+        return $data;
+    };
+    $code = function ($resp) { return substr($resp, 0, 3); };
+    $send = function ($c) use ($fp) { fwrite($fp, $c . "\r\n"); };
+
+    if ($code($read()) !== '220') { fclose($fp); return false; }
+    $send('EHLO ' . $host);
+    if ($code($read()) !== '250') {
+        $send('HELO ' . $host);
+        if ($code($read()) !== '250') { fclose($fp); return false; }
+    }
+    if ($secure === 'tls') {
+        $send('STARTTLS');
+        if ($code($read()) !== '220') { fclose($fp); return false; }
+        if (!stream_socket_enable_crypto($fp, true, STREAM_CRYPTO_METHOD_TLS_CLIENT)) { fclose($fp); return false; }
+        $send('EHLO ' . $host); $read();
+    }
+    $send('AUTH LOGIN');
+    if ($code($read()) !== '334') { fclose($fp); error_log('SMTP AUTH LOGIN rejected'); return false; }
+    $send(base64_encode($user));
+    if ($code($read()) !== '334') { fclose($fp); return false; }
+    $send(base64_encode($pass));
+    if ($code($read()) !== '235') { fclose($fp); error_log('SMTP authentication failed'); return false; }
+    $send('MAIL FROM:<' . $fromEmail . '>');
+    if ($code($read()) !== '250') { fclose($fp); return false; }
+    $send('RCPT TO:<' . $to . '>');
+    $rcpt = $code($read());
+    if ($rcpt !== '250' && $rcpt !== '251') { fclose($fp); error_log('SMTP RCPT refused for ' . $to); return false; }
+    $send('DATA');
+    if ($code($read()) !== '354') { fclose($fp); return false; }
+
+    $headers  = 'From: ' . $fromName . ' <' . $fromEmail . ">\r\n";
+    $headers .= 'To: <' . $to . ">\r\n";
+    $headers .= 'Subject: ' . $subject . "\r\n";
+    $headers .= 'MIME-Version: 1.0' . "\r\n";
+    $headers .= 'Content-Type: text/html; charset=UTF-8' . "\r\n";
+    $headers .= 'Date: ' . date('r') . "\r\n";
+    $body = preg_replace('/\r\n|\r|\n/', "\r\n", $htmlBody);
+    $body = preg_replace('/^\./m', '..', $body); // dot-stuffing
+    fwrite($fp, $headers . "\r\n" . $body . "\r\n.\r\n");
+    if ($code($read()) !== '250') { fclose($fp); error_log('SMTP message not accepted'); return false; }
+    $send('QUIT'); $read();
+    fclose($fp);
+    return true;
+}
+
 /** Email a newly-created user their temporary credentials (from the no-reply address). */
 function sendAccountCreatedEmail($email, $name, $tempPassword){
     $url = "https://www.brightbeginningsfdcc.com.au/portal";
@@ -121,10 +216,7 @@ function sendAccountCreatedEmail($email, $name, $tempPassword){
           . 'After that, you can start using the portal.</p>';
     $txt .= '<p>Thanks,<br>Bright Beginnings Family Day Care Team</p>';
     $txt .= '</body></html>';
-    $headers  = "MIME-Version: 1.0\r\n";
-    $headers .= "Content-type: text/html; charset=UTF-8\r\n";
-    $headers .= "From: Bright Beginnings Family Day Care <noreply@brightbeginningsfdcc.com.au>\r\n";
-    return @mail($email, $subject, $txt, $headers);
+    return sendMail($email, $subject, $txt);
 }
 
 /** Email an existing user asking them to set a new password (security refresh). */
@@ -145,10 +237,7 @@ function sendPasswordResetNoticeEmail($email, $name){
           . 'a lowercase letter, a number and a special character.</p>';
     $txt .= '<p>Thanks,<br>Bright Beginnings Family Day Care Team</p>';
     $txt .= '</body></html>';
-    $headers  = "MIME-Version: 1.0\r\n";
-    $headers .= "Content-type: text/html; charset=UTF-8\r\n";
-    $headers .= "From: Bright Beginnings Family Day Care <noreply@brightbeginningsfdcc.com.au>\r\n";
-    return @mail($email, $subject, $txt, $headers);
+    return sendMail($email, $subject, $txt);
 }
 
 /** Handle the forced first-login password change (posted from the change-password form). */
@@ -481,10 +570,7 @@ your account and change your security password as someone may have guessed it.</
                 $txt .= '</body></html>';
 
                 // Actually send the reset email.
-                $headers  = "MIME-Version: 1.0\r\n";
-                $headers .= "Content-type: text/html; charset=UTF-8\r\n";
-                $headers .= "From: Bright Beginnings Family Day Care <noreply@brightbeginningsfdcc.com.au>\r\n";
-                @mail($to, $subject, $txt, $headers);
+                sendMail($to, $subject, $txt);
 
                 $msg = '<div class="alert alert-success alert-dismissible fade show" role="alert">
                       <strong>Success!</strong> If you supplied a correct email address then an email should have been sent to you.

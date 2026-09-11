@@ -36,6 +36,17 @@ try {
     die('Database connection error. Please try again later.');
 }
 
+/*** Optional SMTP settings for reliable email delivery (from config.local.php). ***/
+if (!defined('SMTP_HOST')) {
+    define('SMTP_HOST',       getenv('SMTP_HOST')       ?: (isset($SMTP_HOST) ? $SMTP_HOST : ''));
+    define('SMTP_PORT',       getenv('SMTP_PORT')       ?: (isset($SMTP_PORT) ? $SMTP_PORT : 465));
+    define('SMTP_USER',       getenv('SMTP_USER')       ?: (isset($SMTP_USER) ? $SMTP_USER : ''));
+    define('SMTP_PASS',       getenv('SMTP_PASS')       ?: (isset($SMTP_PASS) ? $SMTP_PASS : ''));
+    define('SMTP_SECURE',     getenv('SMTP_SECURE')     ?: (isset($SMTP_SECURE) ? $SMTP_SECURE : 'ssl'));
+    define('MAIL_FROM_EMAIL', getenv('MAIL_FROM_EMAIL') ?: (isset($MAIL_FROM_EMAIL) ? $MAIL_FROM_EMAIL : 'noreply@brightbeginningsfdcc.com.au'));
+    define('MAIL_FROM_NAME',  getenv('MAIL_FROM_NAME')  ?: (isset($MAIL_FROM_NAME) ? $MAIL_FROM_NAME : 'Bright Beginnings Family Day Care'));
+}
+
 /*** Base URL ***/
 $url = "https://www.brightbeginningsfdcc.com.au/portal/";
 ?>
