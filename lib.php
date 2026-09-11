@@ -122,7 +122,9 @@ function sendMail($to, $subject, $htmlBody){
     $headers  = "MIME-Version: 1.0\r\n";
     $headers .= "Content-type: text/html; charset=UTF-8\r\n";
     $headers .= "From: " . $fromName . " <" . $fromEmail . ">\r\n";
-    return @mail($to, $subject, $htmlBody, $headers);
+    // Set the envelope sender (Return-Path) to a real domain address so the mail
+    // server does not treat this as an "incorrect FROM" send and rate-limit it.
+    return @mail($to, $subject, $htmlBody, $headers, '-f' . $fromEmail);
 }
 
 /**
