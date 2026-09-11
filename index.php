@@ -10,7 +10,19 @@ if ($_SESSION['currentSession'] != 1 ) {
 }
 include('lib.php');
 include('class.php');
-$role=$_SESSION['role'];
+
+// --- Admin "Preview as" (View as role) handling ---
+if (isset($_GET['viewas']) && $_SESSION['role'] == 1) {
+    if ($_GET['viewas'] === 'exit') {
+        unset($_SESSION['view_as']);
+    } elseif (in_array($_GET['viewas'], array('2','3'), true)) {
+        $_SESSION['view_as'] = $_GET['viewas'];
+    }
+    header('Location: index.php?page=home');
+    exit();
+}
+$realRole = $_SESSION['role'];
+$role = effectiveRole();
 if(!isset($_GET['page']) && isset($_SESSION['currentSession'])){
     $URL="?page=home";
     echo "<script type='text/javascript'>document.location.href='{$URL}';</script>";
@@ -88,7 +100,8 @@ if(!isset($_GET['page']) && isset($_SESSION['currentSession'])){
                     <div class="topbar-divider d-none d-sm-block"></div>
                     
                     <!-- Nav Item - User Information and notification -->
-                    <?php 
+                    <?php
+                    previewMenu();
                     notificationBar();
                     $b=userOption();echo $b;?>
 
@@ -100,6 +113,7 @@ if(!isset($_GET['page']) && isset($_SESSION['currentSession'])){
             <!-- Begin Page Content -->
             <div class="container-fluid">
                 <?php
+                previewBanner();
                 $page = $_GET['page'];
                 /*-----------------v1.0 changes for calender-------------*/
                 if($page == 'home'){
@@ -263,6 +277,23 @@ if(!isset($_GET['page']) && isset($_SESSION['currentSession'])){
                     if($role==1){
                         $userObj=new User();
                         $userObj->addNewUser();
+                    }else{
+                        echo '<h1>Unauthorised access</h1>';
+                    }
+
+                }elseif($page == 'lockedAccounts'){
+                    if($role==1){
+                        $userObj=new User();
+                        $userObj->lockedAccounts();
+                    }else{
+                        echo '<h1>Unauthorised access</h1>';
+                    }
+
+                }elseif($page == 'unlockAccount'){
+                    if($role==1){
+                        $email=$_GET['email'];
+                        $userObj=new User();
+                        $userObj->unlockAccount($email);
                     }else{
                         echo '<h1>Unauthorised access</h1>';
                     }

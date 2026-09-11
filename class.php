@@ -724,6 +724,98 @@ if ($_SESSION['currentSession'] != 1 ) {
          <?php
      }
 
+    /*****************************************
+     * Locked accounts (Admin) - view & unlock users who hit the login lockout
+     * ****************************************
+     */
+    public function lockedAccounts(){
+        global $pdo;
+        $rows = array();
+        try {
+            $query = "SELECT la.email, la.attempts, la.lock_until,
+                             u.`first name` AS firstname, u.`last name` AS lastname, u.role
+                      FROM login_attempts la
+                      LEFT JOIN `user` u ON u.email = la.email
+                      WHERE la.attempts > 0 OR (la.lock_until IS NOT NULL AND la.lock_until > NOW())
+                      ORDER BY la.lock_until IS NULL, la.lock_until DESC";
+            $stmt = $pdo->prepare($query);
+            $stmt->execute();
+            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log('lockedAccounts: ' . $e->getMessage());
+        }
+        ?>
+        <h1 class="h3 mb-4 text-gray-800" style="text-align:center; padding-top:20px;">Locked / Flagged Accounts</h1>
+        <?php if (isset($_GET['status']) && $_GET['status'] == 'unlocked') { ?>
+            <div class="alert alert-success" role="alert">Account unlocked successfully.</div>
+        <?php }
+        if (empty($rows)) { ?>
+            <div class="card mb-4 py-3 border-left-success">
+                <div class="card-body">No accounts are currently locked out. Everyone can log in.</div>
+            </div>
+        <?php } else { ?>
+            <div class="card shadow mb-4">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                    <th>Failed attempts</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            <?php foreach ($rows as $r) {
+                                $name = trim($r['firstname'] . ' ' . $r['lastname']);
+                                if ($name === '') { $name = '<em>Unknown (no matching account)</em>'; }
+                                if ($r['role'] == 1) { $roleName = 'Admin'; }
+                                elseif ($r['role'] == 2) { $roleName = 'Educator/Assistant'; }
+                                elseif ($r['role'] == 3) { $roleName = 'Parent'; }
+                                else { $roleName = '-'; }
+                                $isLocked = (!empty($r['lock_until']) && strtotime($r['lock_until']) > time());
+                                if ($isLocked) {
+                                    $status = '<span class="badge badge-danger">Locked until ' . htmlspecialchars(date('d M Y, g:i A', strtotime($r['lock_until']))) . '</span>';
+                                } else {
+                                    $status = '<span class="badge badge-warning">' . (int)$r['attempts'] . ' failed attempt(s)</span>';
+                                }
+                                ?>
+                                <tr>
+                                    <td><?php echo $name; ?></td>
+                                    <td><?php echo htmlspecialchars($r['email']); ?></td>
+                                    <td><?php echo $roleName; ?></td>
+                                    <td><?php echo (int)$r['attempts']; ?></td>
+                                    <td><?php echo $status; ?></td>
+                                    <td>
+                                        <a href="?page=unlockAccount&email=<?php echo urlencode($r['email']); ?>"
+                                           class="btn btn-success btn-sm"
+                                           onclick="return confirm('Unlock this account so they can log in again?');">
+                                            <i class="fas fa-unlock"></i> Unlock
+                                        </a>
+                                    </td>
+                                </tr>
+                            <?php } ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        <?php }
+    }
+
+    /** Clear the lockout / failed attempts for one account. */
+    public function unlockAccount($email){
+        if (function_exists('clearLoginAttempts')) {
+            clearLoginAttempts($email);
+        }
+        $URL = "?page=lockedAccounts&status=unlocked";
+        echo "<script type='text/javascript'>document.location.href='{$URL}';</script>";
+        echo '<META HTTP-EQUIV="refresh" content="0;URL=' . $URL . '">';
+    }
+
 }
 
 
@@ -737,7 +829,7 @@ class Resources{
     /////////////////////////////////////////
     public function viewAllResources(){
         $row=getAllResources();
-        $currentRole=$_SESSION['role'];
+        $currentRole=function_exists('effectiveRole') ? effectiveRole() : $_SESSION['role'];
         //var_dump($row);
         $resCount=count($row);
         ?>

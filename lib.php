@@ -85,6 +85,67 @@ function verifyUserPassword($plain, $storedHash, $userId = null) {
 }
 
 /*****************************************
+ * LOGIN LOCKOUT (database-backed)
+ * Tracks failed logins per email so an Admin can unlock an account.
+ * ****************************************
+ */
+if (!defined('LOGIN_MAX_ATTEMPTS')) define('LOGIN_MAX_ATTEMPTS', 5);
+if (!defined('LOGIN_LOCK_MINUTES')) define('LOGIN_LOCK_MINUTES', 15);
+
+/** Seconds remaining on an account's lock, or 0 if not locked. */
+function loginLockRemaining($email){
+    global $pdo;
+    try {
+        $stmt = $pdo->prepare("SELECT lock_until FROM login_attempts WHERE email = :e");
+        $stmt->execute(array('e' => $email));
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($row && !empty($row['lock_until'])) {
+            $remaining = strtotime($row['lock_until']) - time();
+            return $remaining > 0 ? $remaining : 0;
+        }
+    } catch (PDOException $e) {
+        error_log('loginLockRemaining: ' . $e->getMessage());
+    }
+    return 0;
+}
+
+/** Record a failed login attempt and lock the account once the limit is hit. */
+function registerFailedLogin($email){
+    global $pdo;
+    try {
+        $stmt = $pdo->prepare("SELECT attempts FROM login_attempts WHERE email = :e");
+        $stmt->execute(array('e' => $email));
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        $attempts = ($row ? (int)$row['attempts'] : 0) + 1;
+        if ($attempts >= LOGIN_MAX_ATTEMPTS) {
+            $lockUntil = date('Y-m-d H:i:s', time() + LOGIN_LOCK_MINUTES * 60);
+            $sql = "INSERT INTO login_attempts (email, attempts, lock_until) VALUES (:e, :a, :l)
+                    ON DUPLICATE KEY UPDATE attempts = :a2, lock_until = :l2";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute(array('e' => $email, 'a' => $attempts, 'l' => $lockUntil, 'a2' => $attempts, 'l2' => $lockUntil));
+        } else {
+            $sql = "INSERT INTO login_attempts (email, attempts, lock_until) VALUES (:e, :a, NULL)
+                    ON DUPLICATE KEY UPDATE attempts = :a2, lock_until = NULL";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute(array('e' => $email, 'a' => $attempts, 'a2' => $attempts));
+        }
+    } catch (PDOException $e) {
+        error_log('registerFailedLogin: ' . $e->getMessage());
+    }
+}
+
+/** Clear all failed-attempt / lock state for an account (used on success and by admin unlock). */
+function clearLoginAttempts($email){
+    global $pdo;
+    try {
+        $stmt = $pdo->prepare("DELETE FROM login_attempts WHERE email = :e");
+        $stmt->execute(array('e' => $email));
+    } catch (PDOException $e) {
+        error_log('clearLoginAttempts: ' . $e->getMessage());
+    }
+}
+
+/*****************************************
  * LOGIN LOGIC
  * ****************************************
  */
@@ -97,17 +158,17 @@ function loginlogic() {
     if (session_status() === PHP_SESSION_NONE) {
         session_start();
     }
-    // Basic brute-force throttling: lock out for 15 minutes after 5 failures.
-    $now = time();
-    if (isset($_SESSION['login_lock_until']) && $now < $_SESSION['login_lock_until']) {
-        $wait = ceil(($_SESSION['login_lock_until'] - $now) / 60);
-        echo "Too many failed login attempts. Please wait {$wait} minute(s) and try again.";
-        return;
-    }
     $msg = "";
     $username = trim($_POST['Email']);
     $password = trim($_POST['Password']);
     if($username != "" && $password != "") {
+        // Database-backed brute-force lockout (an admin can clear it).
+        $lockRemaining = loginLockRemaining($username);
+        if ($lockRemaining > 0) {
+            echo "Too many failed login attempts. This account is temporarily locked. "
+                ."Please try again in ".ceil($lockRemaining / 60)." minute(s), or contact your administrator to unlock it.";
+            return;
+        }
         try {
             $query = "select * from `user` where `email`=:username";
             $stmt = $pdo->prepare($query);
@@ -136,8 +197,8 @@ function loginlogic() {
                     $_SESSION['role']=$row["role"];
                     $_SESSION['userid']=$row ["id"];
                     $_SESSION['name']=$name;
-                    // Successful login: clear any throttling counters.
-                    unset($_SESSION['login_attempts'], $_SESSION['login_lock_until']);
+                    // Successful login: clear any failed-attempt / lock record.
+                    clearLoginAttempts($username);
                     $msg = "Log in Success!";
                     // var_dump($_SESSION);
                     // exit(0);
@@ -146,12 +207,8 @@ function loginlogic() {
                     echo '<META HTTP-EQUIV="refresh" content="0;URL=' . $URL . '">';
                 }
             } else {
-                // Failed attempt: count it and lock out after 5 failures.
-                $_SESSION['login_attempts'] = (isset($_SESSION['login_attempts']) ? $_SESSION['login_attempts'] : 0) + 1;
-                if ($_SESSION['login_attempts'] >= 5) {
-                    $_SESSION['login_lock_until'] = time() + (15 * 60);
-                    $_SESSION['login_attempts'] = 0;
-                }
+                // Failed attempt: record it (and lock the account after the limit).
+                registerFailedLogin($username);
                 $msg = "Invalid username and password!";
             }
         } catch (PDOException $e) {
@@ -445,6 +502,66 @@ function userOption(){
 
 
     return $a.' '.$_SESSION['name'].' '.$b;
+}
+/*****************************************
+ * 'Admin preview (View as role)'
+ * Lets an Admin (role 1) temporarily view the portal as an
+ * Educator/Assistant (2) or Parent (3) without changing their account.
+ * ****************************************
+ */
+function effectiveRole(){
+    if (isset($_SESSION['role']) && $_SESSION['role'] == 1
+        && isset($_SESSION['view_as'])
+        && in_array((string)$_SESSION['view_as'], array('2','3'), true)) {
+        return (int)$_SESSION['view_as'];
+    }
+    return isset($_SESSION['role']) ? $_SESSION['role'] : null;
+}
+function isPreviewing(){
+    return isset($_SESSION['role']) && $_SESSION['role'] == 1
+        && isset($_SESSION['view_as'])
+        && in_array((string)$_SESSION['view_as'], array('2','3'), true);
+}
+function previewRoleName(){
+    if (!isPreviewing()) return '';
+    return ($_SESSION['view_as'] == '2') ? 'Educator/Assistant' : 'Parent';
+}
+// Topbar entry point (Admin only, shown when not already previewing).
+function previewMenu(){
+    if (!isset($_SESSION['role']) || $_SESSION['role'] != 1 || isPreviewing()) return;
+    ?>
+    <li class="nav-item dropdown no-arrow mx-1">
+        <a class="nav-link dropdown-toggle" href="#" id="previewDropdown" role="button"
+           data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class="fas fa-eye fa-fw"></i>
+            <span class="d-none d-lg-inline text-gray-600 small">Preview as</span>
+        </a>
+        <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="previewDropdown">
+            <h6 class="dropdown-header">View the portal as:</h6>
+            <a class="dropdown-item" href="index.php?viewas=2">
+                <i class="fas fa-chalkboard-teacher fa-sm fa-fw mr-2 text-gray-400"></i> Educator/Assistant
+            </a>
+            <a class="dropdown-item" href="index.php?viewas=3">
+                <i class="fas fa-user-friends fa-sm fa-fw mr-2 text-gray-400"></i> Parent
+            </a>
+        </div>
+    </li>
+    <?php
+}
+// Full-width banner shown while previewing, with an exit control.
+function previewBanner(){
+    if (!isPreviewing()) return;
+    $as = previewRoleName();
+    ?>
+    <div class="alert alert-warning d-flex justify-content-between align-items-center mb-4" role="alert"
+         style="border-left:4px solid #f6c23e;">
+        <span><i class="fas fa-eye mr-2"></i> You are previewing the portal as
+            <strong><?php echo $as; ?></strong> &mdash; this is what they see.</span>
+        <a href="index.php?viewas=exit" class="btn btn-sm btn-warning">
+            <i class="fas fa-times mr-1"></i> Exit preview
+        </a>
+    </div>
+    <?php
 }
 /*****************************************
  * 'Get all resources'
