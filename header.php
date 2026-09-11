@@ -121,6 +121,7 @@ if($role==1){
                 <a class="collapse-item" href="?page=currentUsers">Current Users</a>
                 <a class="collapse-item" href="?page=pendingUsers">Pending Users</a>
                 <a class="collapse-item" href="?page=addNewUser">Add New User</a>
+                <a class="collapse-item" href="?page=bulkAddUsers">Bulk Upload (CSV)</a>
                 <a class="collapse-item" href="?page=lockedAccounts">Locked Accounts</a>
             </div>
         </div>

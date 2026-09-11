@@ -170,7 +170,30 @@ if ($_SESSION['currentSession'] != 1 ) {
     ?>
         <script type="text/javascript" src="js/jquery-3.6.0.min.js"></script>
         <script type="text/javascript">
+            function passwordRules(pw){
+                return { len: pw.length>=8&&pw.length<=72, upper:/[A-Z]/.test(pw), lower:/[a-z]/.test(pw), num:/[0-9]/.test(pw), special:/[^A-Za-z0-9]/.test(pw) };
+            }
+            function passwordPolicyError(pw){
+                var r=passwordRules(pw);
+                if(pw.length<8) return "Password must be at least 8 characters long.";
+                if(pw.length>72) return "Password must be at most 72 characters long.";
+                if(!r.upper) return "Password must include at least one uppercase letter (A-Z).";
+                if(!r.lower) return "Password must include at least one lowercase letter (a-z).";
+                if(!r.num) return "Password must include at least one number (0-9).";
+                if(!r.special) return "Password must include at least one special character (e.g. ! @ # $ %).";
+                return "";
+            }
+            function updatePwChecklist(pw){
+                var r=passwordRules(pw);
+                Object.keys(r).forEach(function(k){
+                    var el=document.querySelector('#pwreq li[data-rule="'+k+'"]');
+                    if(!el) return;
+                    el.style.color=r[k]?'#1cc88a':'#888';
+                    el.querySelector('.mark').innerHTML=r[k]?'&#10003;':'&#9675;';
+                });
+            }
             $(document).ready(function() {
+                $('#Password').on('keyup input', function(){ updatePwChecklist($(this).val()); });
                 $('#updateform').submit(function(e) {
                     e.preventDefault();
                     $("#errorblock").css("display","none");
@@ -218,12 +241,16 @@ if ($_SESSION['currentSession'] != 1 ) {
                             errorCount++;
                         }
                     }
-                    if (password.length < 8 ) {
-                        $('#passworderror').append('<div class="error" style="padding-top:10px;margin:0px;margin:0px;"><p class="error" style="color:red; font-size:12px;">Password must be at least 8 characters</p></div>');
-                        errorCount++;
-                    }else if(password!=repeatPassword){
-                        $('#passworderror').append('<div class="error" style="padding-top:10px;margin:0px;margin:0px;"><p class="error" style="color:red; font-size:12px;">Password do not match.</p></div>');
-                        errorCount++;
+                    var passwordSetting = $('select[name="passwordSetting"]').val();
+                    if (passwordSetting === 'change') {
+                        var pwErr = passwordPolicyError(password);
+                        if (pwErr) {
+                            $('#passworderror').append('<div class="error" style="padding-top:10px;margin:0px;"><p class="error" style="color:red; font-size:12px;">'+pwErr+'</p></div>');
+                            errorCount++;
+                        } else if (password != repeatPassword) {
+                            $('#passworderror').append('<div class="error" style="padding-top:10px;margin:0px;"><p class="error" style="color:red; font-size:12px;">Passwords do not match.</p></div>');
+                            errorCount++;
+                        }
                     }
                     var role=$("#role option:selected").text();
                     if(role=="Select your account type"){
@@ -324,6 +351,16 @@ if ($_SESSION['currentSession'] != 1 ) {
 
                                 <div id="passworderror" style="margin-left: 20px;">
 
+                                </div>
+                                <div id="pwreq" style="font-size:12px; color:#888; margin: 8px 0 0 15px;">
+                                    <div style="margin-bottom:4px;">If changing the password, it must include:</div>
+                                    <ul style="list-style:none; padding-left:0; margin:0;">
+                                        <li data-rule="len"><span class="mark">&#9675;</span> At least 8 characters</li>
+                                        <li data-rule="upper"><span class="mark">&#9675;</span> One uppercase letter (A&ndash;Z)</li>
+                                        <li data-rule="lower"><span class="mark">&#9675;</span> One lowercase letter (a&ndash;z)</li>
+                                        <li data-rule="num"><span class="mark">&#9675;</span> One number (0&ndash;9)</li>
+                                        <li data-rule="special"><span class="mark">&#9675;</span> One special character (! @ # $ % &hellip;)</li>
+                                    </ul>
                                 </div>
                                 <div class="form-group">
                                     <select name="passwordSetting" class="dropdown mb-4 btn btn-primary dropdown-toggle">
@@ -543,8 +580,30 @@ if ($_SESSION['currentSession'] != 1 ) {
         ?>
          <script type="text/javascript" src="js/jquery-3.6.0.min.js"></script>
          <script type="text/javascript">
+             function passwordRules(pw){
+                 return { len: pw.length>=8&&pw.length<=72, upper:/[A-Z]/.test(pw), lower:/[a-z]/.test(pw), num:/[0-9]/.test(pw), special:/[^A-Za-z0-9]/.test(pw) };
+             }
+             function passwordPolicyError(pw){
+                 var r=passwordRules(pw);
+                 if(pw.length<8) return "Password must be at least 8 characters long.";
+                 if(pw.length>72) return "Password must be at most 72 characters long.";
+                 if(!r.upper) return "Password must include at least one uppercase letter (A-Z).";
+                 if(!r.lower) return "Password must include at least one lowercase letter (a-z).";
+                 if(!r.num) return "Password must include at least one number (0-9).";
+                 if(!r.special) return "Password must include at least one special character (e.g. ! @ # $ %).";
+                 return "";
+             }
+             function updatePwChecklist(pw){
+                 var r=passwordRules(pw);
+                 Object.keys(r).forEach(function(k){
+                     var el=document.querySelector('#pwreq li[data-rule="'+k+'"]');
+                     if(!el) return;
+                     el.style.color=r[k]?'#1cc88a':'#888';
+                     el.querySelector('.mark').innerHTML=r[k]?'&#10003;':'&#9675;';
+                 });
+             }
              $(document).ready(function() {
-
+                 $('#Password').on('keyup input', function(){ updatePwChecklist($(this).val()); });
                  $('#registrationform').submit(function(e) {
                      e.preventDefault();
                      $("#errorblock").css("display","none");
@@ -591,11 +650,12 @@ if ($_SESSION['currentSession'] != 1 ) {
                              errorCount++;
                          }
                      }
-                     if (password.length < 8 ) {
-                         $('#passworderror').append('<div class="error" style="padding-top:10px;margin:0px;margin:0px;"><p class="error" style="color:red; font-size:12px;">Password must be at least 8 characters</p></div>');
+                     var pwErr = passwordPolicyError(password);
+                     if (pwErr) {
+                         $('#passworderror').append('<div class="error" style="padding-top:10px;margin:0px;"><p class="error" style="color:red; font-size:12px;">'+pwErr+'</p></div>');
                          errorCount++;
                      }else if(password!=repeatPassword){
-                         $('#passworderror').append('<div class="error" style="padding-top:10px;margin:0px;margin:0px;"><p class="error" style="color:red; font-size:12px;">Password do not match.</p></div>');
+                         $('#passworderror').append('<div class="error" style="padding-top:10px;margin:0px;"><p class="error" style="color:red; font-size:12px;">Passwords do not match.</p></div>');
                          errorCount++;
                      }
                      var role=$("#role option:selected").text();
@@ -685,6 +745,16 @@ if ($_SESSION['currentSession'] != 1 ) {
                                  </div>
                                  <div id="passworderror" style="margin-left: 20px;">
 
+                                 </div>
+                                 <div id="pwreq" style="font-size:12px; color:#888; margin: 8px 0 0 15px;">
+                                     <div style="margin-bottom:4px;">Password must include:</div>
+                                     <ul style="list-style:none; padding-left:0; margin:0;">
+                                         <li data-rule="len"><span class="mark">&#9675;</span> At least 8 characters</li>
+                                         <li data-rule="upper"><span class="mark">&#9675;</span> One uppercase letter (A&ndash;Z)</li>
+                                         <li data-rule="lower"><span class="mark">&#9675;</span> One lowercase letter (a&ndash;z)</li>
+                                         <li data-rule="num"><span class="mark">&#9675;</span> One number (0&ndash;9)</li>
+                                         <li data-rule="special"><span class="mark">&#9675;</span> One special character (! @ # $ % &hellip;)</li>
+                                     </ul>
                                  </div>
                              </div>
                              <div class="col-sm-6">
@@ -814,6 +884,240 @@ if ($_SESSION['currentSession'] != 1 ) {
         $URL = "?page=lockedAccounts&status=unlocked";
         echo "<script type='text/javascript'>document.location.href='{$URL}';</script>";
         echo '<META HTTP-EQUIV="refresh" content="0;URL=' . $URL . '">';
+    }
+
+    /*****************************************
+     * Bulk-create users from a CSV upload
+     * ****************************************
+     */
+    public function bulkAddUsers(){
+        ?>
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Bulk Create Users (CSV Upload)</h6>
+            </div>
+            <div class="card-body">
+                <p>Upload a CSV file to create many accounts at once. Each new user gets a temporary
+                   password by email and is asked to set their own password on first login.</p>
+                <ol>
+                    <li><a href="new_users_template.csv" download><i class="fas fa-download"></i> Download the CSV template</a>, then fill in one user per row.</li>
+                    <li>Columns (in this order): <strong>FirstName, LastName, Email, Role</strong>.</li>
+                    <li>Role must be <strong>Educator/Assistant</strong> or <strong>Parent</strong> (you can also type <em>Admin</em>).</li>
+                    <li>Save as <strong>.csv</strong> and upload it below.</li>
+                </ol>
+                <form action="index.php?page=bulkAddUsersProcess" method="post" enctype="multipart/form-data" class="mt-3">
+                    <div class="form-group">
+                        <input type="file" name="csvfile" accept=".csv" class="form-control-file" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-users"></i> Upload &amp; Create Users
+                    </button>
+                </form>
+            </div>
+        </div>
+        <?php
+    }
+
+    public function processBulkUsers(){
+        global $pdo;
+        echo '<h1 class="h3 mb-4 text-gray-800">Bulk User Creation &mdash; Results</h1>';
+        if (!isset($_FILES['csvfile']) || $_FILES['csvfile']['error'] !== UPLOAD_ERR_OK) {
+            echo '<div class="alert alert-danger">No file was uploaded, or there was an upload error. '
+               . '<a href="?page=bulkAddUsers">Try again</a>.</div>';
+            return;
+        }
+        $ext = strtolower(pathinfo($_FILES['csvfile']['name'], PATHINFO_EXTENSION));
+        if ($ext !== 'csv') {
+            echo '<div class="alert alert-danger">Please upload a <strong>.csv</strong> file. '
+               . '<a href="?page=bulkAddUsers">Try again</a>.</div>';
+            return;
+        }
+        $handle = fopen($_FILES['csvfile']['tmp_name'], 'r');
+        if (!$handle) {
+            echo '<div class="alert alert-danger">Could not read the uploaded file. '
+               . '<a href="?page=bulkAddUsers">Try again</a>.</div>';
+            return;
+        }
+
+        $created = array();
+        $skipped = array();
+        $rowNum  = 0;
+        $map = array('first' => 0, 'last' => 1, 'email' => 2, 'role' => 3);
+
+        while (($data = fgetcsv($handle)) !== false) {
+            $rowNum++;
+            // Row 1 is the header. Map columns by name when possible.
+            if ($rowNum === 1) {
+                $header = array_map(function ($h) { return strtolower(trim($h)); }, $data);
+                $f = array_search('firstname', $header);
+                $l = array_search('lastname', $header);
+                $e = array_search('email', $header);
+                $r = array_search('role', $header);
+                if ($f !== false && $l !== false && $e !== false && $r !== false) {
+                    $map = array('first' => $f, 'last' => $l, 'email' => $e, 'role' => $r);
+                }
+                continue;
+            }
+            // Skip completely blank lines.
+            $nonEmpty = array_filter($data, function ($v) { return trim($v) !== ''; });
+            if (count($nonEmpty) === 0) { continue; }
+
+            $first   = isset($data[$map['first']]) ? trim($data[$map['first']]) : '';
+            $last    = isset($data[$map['last']])  ? trim($data[$map['last']])  : '';
+            $email   = isset($data[$map['email']]) ? trim($data[$map['email']]) : '';
+            $roleRaw = isset($data[$map['role']])  ? trim($data[$map['role']])  : '';
+            $role    = mapRoleName($roleRaw);
+
+            if ($first === '' || $last === '' || $email === '') {
+                $skipped[] = array($rowNum, $email, 'Missing required field'); continue;
+            }
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $skipped[] = array($rowNum, $email, 'Invalid email address'); continue;
+            }
+            if ($role === null) {
+                $skipped[] = array($rowNum, $email, 'Unknown role: ' . htmlspecialchars($roleRaw)); continue;
+            }
+            try {
+                $chk = $pdo->prepare("SELECT id FROM `user` WHERE email = :e");
+                $chk->execute(array('e' => $email));
+                if ($chk->fetch()) {
+                    $skipped[] = array($rowNum, $email, 'Email already exists'); continue;
+                }
+                $temp = generateTempPassword();
+                $hash = hashPassword($temp);
+                $ins = $pdo->prepare("INSERT INTO `user`
+                    (`first name`, `last name`, `email`, `password`, `role`, `verified`, `newuser`, `must_change_password`)
+                    VALUES (:fn, :ln, :em, :pw, :r, 1, 1, 1)");
+                $ins->execute(array('fn' => $first, 'ln' => $last, 'em' => $email, 'pw' => $hash, 'r' => $role));
+                $sent = sendAccountCreatedEmail($email, $first . ' ' . $last, $temp);
+                $created[] = array($rowNum, $email, $role, $sent);
+            } catch (PDOException $ex) {
+                error_log('processBulkUsers: ' . $ex->getMessage());
+                $skipped[] = array($rowNum, $email, 'Database error');
+            }
+        }
+        fclose($handle);
+
+        $roleLabel = function ($r) {
+            if ($r == 1) return 'Admin';
+            if ($r == 2) return 'Educator/Assistant';
+            if ($r == 3) return 'Parent';
+            return '-';
+        };
+
+        echo '<div class="alert alert-info"><strong>' . count($created) . '</strong> account(s) created, '
+           . '<strong>' . count($skipped) . '</strong> row(s) skipped.</div>';
+
+        if (!empty($created)) {
+            echo '<div class="card shadow mb-4"><div class="card-header py-3"><h6 class="m-0 font-weight-bold text-success">Created</h6></div><div class="card-body"><div class="table-responsive"><table class="table table-bordered"><thead><tr><th>Row</th><th>Email</th><th>Role</th><th>Welcome email</th></tr></thead><tbody>';
+            foreach ($created as $c) {
+                $mail = $c[3] ? '<span class="badge badge-success">Sent</span>' : '<span class="badge badge-warning">Not sent</span>';
+                echo '<tr><td>' . (int)$c[0] . '</td><td>' . htmlspecialchars($c[1]) . '</td><td>' . $roleLabel($c[2]) . '</td><td>' . $mail . '</td></tr>';
+            }
+            echo '</tbody></table></div></div></div>';
+        }
+        if (!empty($skipped)) {
+            echo '<div class="card shadow mb-4"><div class="card-header py-3"><h6 class="m-0 font-weight-bold text-danger">Skipped</h6></div><div class="card-body"><div class="table-responsive"><table class="table table-bordered"><thead><tr><th>Row</th><th>Email</th><th>Reason</th></tr></thead><tbody>';
+            foreach ($skipped as $s) {
+                echo '<tr><td>' . (int)$s[0] . '</td><td>' . htmlspecialchars($s[1]) . '</td><td>' . htmlspecialchars($s[2]) . '</td></tr>';
+            }
+            echo '</tbody></table></div></div></div>';
+        }
+        echo '<a href="?page=bulkAddUsers" class="btn btn-secondary">Upload another file</a> '
+           . '<a href="?page=currentUsers" class="btn btn-primary">View current users</a>';
+    }
+
+    /*****************************************
+     * Forced password change on first login
+     * ****************************************
+     */
+    public function forceChangePasswordForm(){
+        ?>
+        <div class="row justify-content-center">
+            <div class="col-lg-6">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Set your new password</h6>
+                    </div>
+                    <div class="card-body">
+                        <p>Welcome! Before you continue, please set a new password for your account.</p>
+                        <form id="firstLoginForm">
+                            <div class="form-group">
+                                <label for="Password">New password</label>
+                                <input type="password" class="form-control" id="Password" name="Password" required>
+                            </div>
+                            <div id="pwreq" style="font-size:12px; color:#888; margin: 8px 0;">
+                                <div style="margin-bottom:4px;">Your password must include:</div>
+                                <ul style="list-style:none; padding-left:0; margin:0;">
+                                    <li data-rule="len"><span class="mark">&#9675;</span> At least 8 characters</li>
+                                    <li data-rule="upper"><span class="mark">&#9675;</span> One uppercase letter (A&ndash;Z)</li>
+                                    <li data-rule="lower"><span class="mark">&#9675;</span> One lowercase letter (a&ndash;z)</li>
+                                    <li data-rule="num"><span class="mark">&#9675;</span> One number (0&ndash;9)</li>
+                                    <li data-rule="special"><span class="mark">&#9675;</span> One special character (! @ # $ % &hellip;)</li>
+                                </ul>
+                            </div>
+                            <div class="form-group">
+                                <label for="RepeatPassword">Repeat new password</label>
+                                <input type="password" class="form-control" id="RepeatPassword" name="RepeatPassword" required>
+                            </div>
+                            <div id="firstLoginError" style="color:red; font-size:13px; margin-bottom:10px;"></div>
+                            <button type="submit" class="btn btn-primary">Save password &amp; continue</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script type="text/javascript">
+            function flPasswordRules(pw){
+                return {
+                    len: pw.length >= 8 && pw.length <= 72,
+                    upper: /[A-Z]/.test(pw), lower: /[a-z]/.test(pw),
+                    num: /[0-9]/.test(pw), special: /[^A-Za-z0-9]/.test(pw)
+                };
+            }
+            function flPolicyError(pw){
+                var r = flPasswordRules(pw);
+                if (pw.length < 8)  return "Password must be at least 8 characters long.";
+                if (pw.length > 72) return "Password must be at most 72 characters long.";
+                if (!r.upper)   return "Password must include at least one uppercase letter (A-Z).";
+                if (!r.lower)   return "Password must include at least one lowercase letter (a-z).";
+                if (!r.num)     return "Password must include at least one number (0-9).";
+                if (!r.special) return "Password must include at least one special character.";
+                return "";
+            }
+            $(document).ready(function(){
+                $('#Password').on('keyup input', function(){
+                    var r = flPasswordRules($(this).val());
+                    Object.keys(r).forEach(function(k){
+                        var el = document.querySelector('#pwreq li[data-rule="'+k+'"]');
+                        if(!el) return;
+                        el.style.color = r[k] ? '#1cc88a' : '#888';
+                        el.querySelector('.mark').innerHTML = r[k] ? '&#10003;' : '&#9675;';
+                    });
+                });
+                $('#firstLoginForm').submit(function(e){
+                    e.preventDefault();
+                    $('#firstLoginError').text('');
+                    var pw = $('#Password').val();
+                    var rp = $('#RepeatPassword').val();
+                    var err = flPolicyError(pw);
+                    if (err) { $('#firstLoginError').text(err); return; }
+                    if (pw !== rp) { $('#firstLoginError').text('Passwords do not match.'); return; }
+                    $.ajax({
+                        url: 'lib.php', type: 'POST',
+                        data: { changePasswordFirstLogin: 1, Password: pw },
+                        success: function(data){
+                            if (data.indexOf('Success') !== -1) {
+                                window.location.href = 'index.php?page=home';
+                            } else {
+                                $('#firstLoginError').text(data);
+                            }
+                        }
+                    });
+                });
+            });
+        </script>
+        <?php
     }
 
 }

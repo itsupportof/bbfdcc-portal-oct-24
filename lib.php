@@ -23,6 +23,8 @@ if(isset($_POST['loginProcess'])) {
     getAResetLink();
 }elseif(isset($_POST['resetPassEmail'])){
     resetPasword();
+}elseif(isset($_POST['changePasswordFirstLogin'])){
+    changePasswordFirstLogin();
 }else if(isset($_POST['page']) && $_POST['page']=='addNewResource'){
     addNewResource();
 }if(isset($_POST['page']) && $_POST['page']=='updateResource'){
@@ -72,6 +74,82 @@ function validatePassword($pw){
     if (!preg_match('/[0-9]/', $pw))   return "Password must include at least one number (0-9).";
     if (!preg_match('/[^A-Za-z0-9]/', $pw)) return "Password must include at least one special character (e.g. !@#\$%).";
     return "";
+}
+
+/**
+ * Generate a random temporary password that satisfies validatePassword().
+ * Ambiguous characters (0/O, 1/l/I) are omitted for readability.
+ */
+function generateTempPassword($length = 12){
+    $upper   = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+    $lower   = 'abcdefghijkmnpqrstuvwxyz';
+    $digits  = '23456789';
+    $special = '!@#%*?';
+    $all = $upper . $lower . $digits . $special;
+    // Guarantee at least one of each required class.
+    $pw  = $upper[random_int(0, strlen($upper) - 1)];
+    $pw .= $lower[random_int(0, strlen($lower) - 1)];
+    $pw .= $digits[random_int(0, strlen($digits) - 1)];
+    $pw .= $special[random_int(0, strlen($special) - 1)];
+    for ($i = strlen($pw); $i < $length; $i++) {
+        $pw .= $all[random_int(0, strlen($all) - 1)];
+    }
+    return str_shuffle($pw);
+}
+
+/** Map a CSV role value ("Educator/Assistant", "Parent", "Admin", or 1/2/3) to its id, or null. */
+function mapRoleName($raw){
+    $r = strtolower(trim($raw));
+    if ($r === '2' || strpos($r, 'educator') !== false || strpos($r, 'assistant') !== false) return 2;
+    if ($r === '3' || strpos($r, 'parent') !== false) return 3;
+    if ($r === '1' || strpos($r, 'admin') !== false) return 1;
+    return null;
+}
+
+/** Email a newly-created user their temporary credentials (from the no-reply address). */
+function sendAccountCreatedEmail($email, $name, $tempPassword){
+    $url = "https://www.brightbeginningsfdcc.com.au/portal";
+    $subject = "[Bright Beginnings Family Day Care] Your portal account is ready";
+    $txt  = '<html><body>';
+    $txt .= '<p>Dear ' . htmlspecialchars($name) . ',</p>';
+    $txt .= '<p>An account has been created for you on the Bright Beginnings Family Day Care portal.</p>';
+    $txt .= '<p>You can sign in with these temporary details:</p>';
+    $txt .= '<p><strong>Login page:</strong> <a href="' . $url . '/login.php">' . $url . '/login.php</a><br>';
+    $txt .= '<strong>Email:</strong> ' . htmlspecialchars($email) . '<br>';
+    $txt .= '<strong>Temporary password:</strong> ' . htmlspecialchars($tempPassword) . '</p>';
+    $txt .= '<p>For your security, you will be asked to set your own password the first time you log in. '
+          . 'After that, you can start using the portal.</p>';
+    $txt .= '<p>Thanks,<br>Bright Beginnings Family Day Care Team</p>';
+    $txt .= '</body></html>';
+    $headers  = "MIME-Version: 1.0\r\n";
+    $headers .= "Content-type: text/html; charset=UTF-8\r\n";
+    $headers .= "From: Bright Beginnings Family Day Care <noreply@brightbeginningsfdcc.com.au>\r\n";
+    return @mail($email, $subject, $txt, $headers);
+}
+
+/** Handle the forced first-login password change (posted from the change-password form). */
+function changePasswordFirstLogin(){
+    global $pdo;
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+    if (empty($_SESSION['currentSession']) || $_SESSION['currentSession'] != 1 || empty($_SESSION['userid'])) {
+        echo "Your session has expired. Please log in again.";
+        return;
+    }
+    $plain = isset($_POST['Password']) ? $_POST['Password'] : '';
+    $pwError = validatePassword($plain);
+    if ($pwError !== "") { echo $pwError; return; }
+    try {
+        $hash = hashPassword($plain);
+        $stmt = $pdo->prepare("UPDATE `user` SET `password` = :p, `must_change_password` = 0 WHERE `id` = :id");
+        $stmt->execute(array('p' => $hash, 'id' => $_SESSION['userid']));
+        $_SESSION['must_change_password'] = 0;
+        echo "Success: Your password has been updated. Redirecting...";
+    } catch (PDOException $e) {
+        error_log('changePasswordFirstLogin: ' . $e->getMessage());
+        echo "A server error occurred. Please try again.";
+    }
 }
 
 /**
@@ -214,6 +292,7 @@ function loginlogic() {
                     $_SESSION['role']=$row["role"];
                     $_SESSION['userid']=$row ["id"];
                     $_SESSION['name']=$name;
+                    $_SESSION['must_change_password']=isset($row['must_change_password']) ? (int)$row['must_change_password'] : 0;
                     // Successful login: clear any failed-attempt / lock record.
                     clearLoginAttempts($username);
                     $msg = "Log in Success!";

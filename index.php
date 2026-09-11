@@ -23,6 +23,15 @@ if (isset($_GET['viewas']) && $_SESSION['role'] == 1) {
 }
 $realRole = $_SESSION['role'];
 $role = effectiveRole();
+
+// Force a first-login password change before any other page is allowed.
+if (!empty($_SESSION['must_change_password'])) {
+    $forcePage = isset($_GET['page']) ? $_GET['page'] : '';
+    if ($forcePage !== 'changePassword' && $forcePage !== 'logout') {
+        header('Location: index.php?page=changePassword');
+        exit();
+    }
+}
 if(!isset($_GET['page']) && isset($_SESSION['currentSession'])){
     $URL="?page=home";
     echo "<script type='text/javascript'>document.location.href='{$URL}';</script>";
@@ -294,6 +303,26 @@ if(!isset($_GET['page']) && isset($_SESSION['currentSession'])){
                         $email=$_GET['email'];
                         $userObj=new User();
                         $userObj->unlockAccount($email);
+                    }else{
+                        echo '<h1>Unauthorised access</h1>';
+                    }
+
+                }elseif($page == 'changePassword'){
+                    $userObj=new User();
+                    $userObj->forceChangePasswordForm();
+
+                }elseif($page == 'bulkAddUsers'){
+                    if($role==1){
+                        $userObj=new User();
+                        $userObj->bulkAddUsers();
+                    }else{
+                        echo '<h1>Unauthorised access</h1>';
+                    }
+
+                }elseif($page == 'bulkAddUsersProcess'){
+                    if($role==1){
+                        $userObj=new User();
+                        $userObj->processBulkUsers();
                     }else{
                         echo '<h1>Unauthorised access</h1>';
                     }
