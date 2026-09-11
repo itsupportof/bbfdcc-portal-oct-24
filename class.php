@@ -110,7 +110,7 @@ if ($_SESSION['currentSession'] != 1 ) {
                                         <td><?php if($data["role"]=='1'){
                                                 echo 'admin';
                                             }elseif($data["role"]=='2'){
-                                                echo 'Educator';
+                                                echo 'Educator/Assistant';
                                             }else{
                                                 echo 'Parent';
                                             } ?></td>
@@ -340,10 +340,10 @@ if ($_SESSION['currentSession'] != 1 ) {
                                 <select class="browser-default custom-select form-select" id="role">
                                     <option value="funding" selected="">Select your account type</option>
                                     <option value="1" style="">Admin</option>
-                                    <option value="2" style="">Educator</option>
+                                    <option value="2" style="">Educator/Assistant</option>
                                     <option value="3">Parent</option>
                                 </select>
-                                <div ><br>Current role: <span style="color:green;"><?php if ($row["role"]==1){echo 'Admin';}elseif($row["role"]==2){echo 'Educator';}else{echo 'Parent';} ?></span></div>
+                                <div ><br>Current role: <span style="color:green;"><?php if ($row["role"]==1){echo 'Admin';}elseif($row["role"]==2){echo 'Educator/Assistant';}else{echo 'Parent';} ?></span></div>
                                 <div id="fundingerror" style="margin-left: 20px;"></div>
                             </div>
                             <input type="submit" name="submitBtnLogin" id="submitBtnLogin" value="Update" class="btn btn-primary btn-user btn-block" />
@@ -453,7 +453,7 @@ if ($_SESSION['currentSession'] != 1 ) {
                                         <td><?php if($data["role"]=='1'){
                                             echo 'admin';
                                         }elseif($data["role"]=='2'){
-                                            echo 'Educator';
+                                            echo 'Educator/Assistant';
                                         }else{
                                             echo 'Parent';
                                         } ?></td>
@@ -692,7 +692,7 @@ if ($_SESSION['currentSession'] != 1 ) {
                                      <select class="browser-default custom-select form-select" id="role">
                                          <option value="funding" selected="">Select your account type</option>
                                          <option value="1" style="">Admin</option>
-                                         <option value="2" style="">Educator</option>
+                                         <option value="2" style="">Educator/Assistant</option>
                                          <option value="3">Parent</option>
                                      </select>
                                      <div id="fundingerror" style="margin-left: 20px;"></div>
@@ -1427,7 +1427,7 @@ class Resources{
                             <select name="addResourceRole" class="dropdown mb-4 btn btn-primary dropdown-toggle">
 
                                 <option>Who can view the resource?</option>
-                                <option value="2">Educator only</option>
+                                <option value="2">Educator/Assistant only</option>
                                 <option value="3">Parents only</option>
                                 <option value="23">Both</option>
                             </select>
@@ -1487,7 +1487,7 @@ class Resources{
                             <select name="addResourceRole" class="dropdown mb-4 btn btn-primary dropdown-toggle">
 
                                 <option>Who can view the resource?</option>
-                                <option value="2">Educator only</option>
+                                <option value="2">Educator/Assistant only</option>
                                 <option value="3">Parents only</option>
                                 <option value="23">Both</option>
                             </select>
@@ -1580,11 +1580,11 @@ if(isset($_GET['status']) && $_GET['status']=="deleted"){?>
                                 <td><?php echo $row[$i]["category"];?></td>
                                 <td>
                                     <?php if($row[$i]["role"]==2){
-                                        echo 'Educator';
+                                        echo 'Educator/Assistant';
                                     }elseif ($row[$i]["role"]==3){
                                         echo 'Parent';
                                     }elseif ($row[$i]["role"]==23){
-                                        echo 'Educators and parents';
+                                        echo 'Educators/Assistants and parents';
                                     }else{
                                         echo 'role not assigned yet';
                                     }?>
@@ -1737,18 +1737,18 @@ if(isset($_GET['status']) && $_GET['status']=="deleted"){?>
                             <select name="addResourceRole" class="dropdown mb-4 btn btn-primary dropdown-toggle">
 
                                 <option>Who can view the resource?</option>
-                                <option value="2">Educator only</option>
+                                <option value="2">Educator/Assistant only</option>
                                 <option value="3">Parents only</option>
                                 <option value="23">Both</option>
                             </select>
                             <div>
                             <?php echo "<span><b>Currently Selected Role:</b> </span> ";
                             if($row["role"]==2){
-                                echo 'Educator';
+                                echo 'Educator/Assistant';
                             }elseif ($row["role"]==3){
                                 echo 'Parent';
                             }elseif ($row["role"]==23){
-                                echo 'Educators and parents';
+                                echo 'Educators/Assistants and parents';
                             }else{
                                 echo 'role not assigned yet';
                             }?>
@@ -3618,7 +3618,7 @@ class Educator{
                     <form id="assignform" method="post" enctype="multipart/form-data">
                         <div class="form-group" id="educatordropdowndiv">
                             <input type="text" class="form-control" id="recordid" placeholder="" name="recordid" value="" style="display: none;">
-                            <label for="exampleInputEmail1">Educator</label><br>
+                            <label for="exampleInputEmail1">Educator/Assistant</label><br>
                             <select id="educatorSelector" name="educator" class="dropdown mb-4 btn btn-primary dropdown-toggle">
                                 <option value="0">Select the educator</option>
                                 <?php foreach($row as $var) {
@@ -3702,7 +3702,7 @@ class Educator{
         ?>
 
 
-        <h1 class="h3 mb-4 text-gray-800" style="text-align: center; padding-top: 30px;">All Educators Assignments</h1>
+        <h1 class="h3 mb-4 text-gray-800" style="text-align: center; padding-top: 30px;">All Educators/Assistants Assignments</h1>
         <!-- Page Heading -->
         <div class="row">
             <div class="col-sm-12">
@@ -3716,7 +3716,7 @@ class Educator{
                                 <thead>
                                 <tr>
                                     <th style="display:none;">Id</th>
-                                    <th>Educator Name</th>
+                                    <th>Educator/Assistant Name</th>
                                     <th>Enrolment Form Id</th>
                                     <th>Enrolment Form Prefill</th>
                                     <th>Regular/Rountine Outing/Transport Authorisation Form</th>
@@ -3734,7 +3734,7 @@ class Educator{
                                 <tfoot>
                                 <tr>
                                     <th style="display:none;">Id</th>
-                                    <th>Educator Name</th>
+                                    <th>Educator/Assistant Name</th>
                                     <th>Enrolment Form Id</th>
                                     <th>Enrolment Form Prefill</th>
                                     <th>Regular/Rountine Outing/Transport Authorisation Form</th>
@@ -3899,7 +3899,7 @@ class Educator{
                                 <thead>
                                 <tr>
                                     <th style="display:none;">Id</th>
-                                    <th>Educator Name</th>
+                                    <th>Educator/Assistant Name</th>
                                     <th>Form name(Form ID)</th>
                                     <th>Submission Id</th>
                                     <th>Date and time</th>
@@ -3913,7 +3913,7 @@ class Educator{
                                 <tfoot>
                                 <tr>
                                     <th style="display:none;">Id</th>
-                                    <th>Educator Name</th>
+                                    <th>Educator/Assistant Name</th>
                                     <th>Form name(Form ID)</th>
                                     <th>Submission Id</th>
                                     <th>Date and time</th>
@@ -4245,7 +4245,7 @@ class Educator{
                                 <thead>
                                 <tr>
                                     <th style="">Id</th>
-                                    <th>Educator Name</th>
+                                    <th>Educator/Assistant Name</th>
                                     <th>Form name(Form ID)</th>
                                     <th>Submission Id</th>
                                     <th>Date and time</th>
@@ -4259,7 +4259,7 @@ class Educator{
                                 <tfoot>
                                 <tr>
                                     <th style="">Id</th>
-                                    <th>Educator Name</th>
+                                    <th>Educator/Assistant Name</th>
                                     <th>Form name(Form ID)</th>
                                     <th>Submission Id</th>
                                     <th>Date and time</th>
@@ -4433,7 +4433,7 @@ class Educator{
                     var educator=$("#educatorsDropdown").val();
                     if (educator == 'all'){
                         $('#educatorNotSelectedError').remove();
-                        $('#createSelectOptionsInside').before('<div id="educatorNotSelectedError" class="alert alert-danger" role="alert">Select An Educator! </div>');
+                        $('#createSelectOptionsInside').before('<div id="educatorNotSelectedError" class="alert alert-danger" role="alert">Select An Educator/Assistant! </div>');
                     }else if (educator != 'all'){
                         $('#educatorNotSelectedError').remove();
                         //alert("EDUCATOR: "+educator);
@@ -4657,7 +4657,7 @@ border: 3px solid;">
                     },
                     success: function (data) {
                         var result = jQuery.parseJSON(data);
-                        $('#educatorsDropdown').append(`<option value="all" selected="">Select Educator</option>`);
+                        $('#educatorsDropdown').append(`<option value="all" selected="">Select Educator/Assistant</option>`);
                         $.each(result, function() {
                             var optionText= this.firstname+ ' '+this.lastname+' '+ this.email;
                             //alert(optionText);
@@ -4675,7 +4675,7 @@ border: 3px solid;">
                     $('#formTypes option:contains("Select one of the form")').prop('selected', true);
                 if ($(this).val() == 'all'){
                     $('#educatorNotSelectedError').remove();
-                    $('#createSelectOptionsInside').before('<div id="educatorNotSelectedError" class="alert alert-danger" role="alert">Select An Educator! </div>');
+                    $('#createSelectOptionsInside').before('<div id="educatorNotSelectedError" class="alert alert-danger" role="alert">Select An Educator/Assistant! </div>');
                 }else if ($(this).val() != 'all'){
                     $('#educatorNotSelectedError').remove();
                     $('#dataTable').dataTable().fnClearTable();
@@ -4732,7 +4732,7 @@ border: 3px solid;">
                     var educator=$("#educatorsDropdown").val();
                     if (educator == 'all'){
                         $('#educatorNotSelectedError').remove();
-                        $('#createSelectOptionsInside').before('<div id="educatorNotSelectedError" class="alert alert-danger" role="alert">Select An Educator! </div>');
+                        $('#createSelectOptionsInside').before('<div id="educatorNotSelectedError" class="alert alert-danger" role="alert">Select An Educator/Assistant! </div>');
                     }else if (educator != 'all'){
                         $('#educatorNotSelectedError').remove();
                         //alert("EDUCATOR: "+educator);
@@ -4838,7 +4838,7 @@ border: 3px solid;">
 
                     if (educator == 'all'){
                         $('#educatorNotSelectedError').remove();
-                        $('#createSelectOptionsInside').before('<div id="educatorNotSelectedError" class="alert alert-danger" role="alert">Select An Educator! </div>');
+                        $('#createSelectOptionsInside').before('<div id="educatorNotSelectedError" class="alert alert-danger" role="alert">Select An Educator/Assistant! </div>');
                         errorcount++;
                     }else if (educator != 'all'){
                         $('#educatorNotSelectedError').remove();
@@ -5104,7 +5104,7 @@ border: 3px solid;">
                                             ?></td>
                                         <td><?php
                                             if($data["role"]=='2'){
-                                                echo 'Educator';
+                                                echo 'Educator/Assistant';
                                             } ?></td>
 
                                         <td>
@@ -5592,7 +5592,7 @@ border: 3px solid;">
                     },
                     success: function (data) {
                         var result = jQuery.parseJSON(data);
-                        $('#educatorsDropdown').append(`<option value="" selected="">Select Educator</option>`);
+                        $('#educatorsDropdown').append(`<option value="" selected="">Select Educator/Assistant</option>`);
                         $.each(result, function() {
                             var optionText= this.firstname+ ' '+this.lastname+' '+ this.email;
                             //alert(optionText);
@@ -5820,7 +5820,7 @@ border: 3px solid;">
         <h1 class="h3 mb-4 text-gray-800" style="text-align: center; padding-top: 30px;">All Submissions</h1>
         <div class="form-group" id="educatordropdowndiv">
             <input type="text" class="form-control" id="recordid" placeholder="" name="recordid" value="" style="display: none;">
-            <label for="exampleInputEmail1">Educator</label><br>
+            <label for="exampleInputEmail1">Educator/Assistant</label><br>
             <select id="educatorSelector" name="educator" class="dropdown mb-4 btn btn-primary dropdown-toggle">
                 <option value="0">Select the educator</option>
                 <?php foreach($row as $var) {
@@ -5842,7 +5842,7 @@ border: 3px solid;">
                                 <thead>
                                 <tr>
                                     <th style="display:none;">Id</th>
-                                    <th>Educator Name</th>
+                                    <th>Educator/Assistant Name</th>
                                     <th>Enrolment Form Id</th>
                                     <th>Enrolment Form Prefill</th>
                                     <th>Regular/Rountine Outing/Transport Authorisation Form</th>
@@ -5860,7 +5860,7 @@ border: 3px solid;">
                                 <tfoot>
                                 <tr>
                                     <th style="display:none;">Id</th>
-                                    <th>Educator Name</th>
+                                    <th>Educator/Assistant Name</th>
                                     <th>Enrolment Form Id</th>
                                     <th>Enrolment Form Prefill</th>
                                     <th>Regular/Rountine Outing/Transport Authorisation Form</th>
@@ -6294,7 +6294,7 @@ border: 3px solid;">
                 <div class="p-5">
                     <div class="jumbotron bg-gray-200 border-bottom-success">
                         <div class="text-center">
-                            <h1 class="h4 text-gray-900 mb-4">Add New Form For All Educators</h1>
+                            <h1 class="h4 text-gray-900 mb-4">Add New Form For All Educators/Assistants</h1>
                         </div>
                         <form class="user" id="addNewForm" method="post" action="">
                             <input type="text" id="statusOfUpdationOrInsertion" value="<?php if(isset($_GET['formid'])){echo $_GET['formid'];}else{echo 0;}?>" style="display: none;"/>
@@ -6477,7 +6477,7 @@ border: 3px solid;">
                                 <thead>
                                 <tr>
                                     <th style="">Id</th>
-                                    <th>Educator Name</th>
+                                    <th>Educator/Assistant Name</th>
                                     <th>Form name(Form ID)</th>
                                     <th>Submission Id</th>
                                     <th>Date and time</th>
@@ -6487,7 +6487,7 @@ border: 3px solid;">
                                 <tfoot>
                                 <tr>
                                     <th style="">Id</th>
-                                    <th>Educator Name</th>
+                                    <th>Educator/Assistant Name</th>
                                     <th>Form name(Form ID)</th>
                                     <th>Submission Id</th>
                                     <th>Date and time</th>
@@ -6582,7 +6582,7 @@ border: 3px solid;">
             ?>
 
 
-            <h1 class="h3 mb-4 text-gray-800" style="text-align: center; padding-top: 30px;">All Educators Default Form Assignments</h1>
+            <h1 class="h3 mb-4 text-gray-800" style="text-align: center; padding-top: 30px;">All Educators/Assistants Default Form Assignments</h1>
             <!-- Page Heading -->
             <div class="row">
                 <div class="col-sm-12">
