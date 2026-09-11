@@ -187,7 +187,7 @@ require 'lib.php';
                             <div class="form-group row">
                                 <select class="browser-default custom-select form-select" id="role">
                                     <option value="funding" selected="">Select your account type</option>
-                                    <option value="2" style="">Educator</option>
+                                    <option value="2" style="">Educator/Assistant</option>
                                     <option value="3">Parent</option>
                                 </select>
                                 <div id="fundingerror" style="margin-left: 20px;"></div>

@@ -47,6 +47,44 @@ else if(isset($_POST['page'])&& $_POST['page']=='getCalenderDetails'){
 /*--////////////////---------v1.0 changes for calender-----------------*/
 
 /*****************************************
+ * PASSWORD HELPERS
+ * Modern password hashing (bcrypt) with transparent, backward-compatible
+ * migration of legacy MD5 hashes. Existing users keep working and are
+ * upgraded to bcrypt automatically the next time they log in.
+ * ****************************************
+ */
+function hashPassword($plain) {
+    return password_hash((string)$plain, PASSWORD_DEFAULT);
+}
+
+/**
+ * Verify a plaintext password against a stored hash.
+ * If the stored hash is a legacy 32-char MD5 and matches, it is transparently
+ * re-hashed to bcrypt and saved (when $userId is provided).
+ */
+function verifyUserPassword($plain, $storedHash, $userId = null) {
+    global $pdo;
+    $plain = (string)$plain;
+    $storedHash = (string)$storedHash;
+    // Legacy MD5 hashes are exactly 32 hexadecimal characters.
+    if (preg_match('/^[a-f0-9]{32}$/i', $storedHash)) {
+        if (hash_equals(strtolower($storedHash), md5($plain))) {
+            if ($userId !== null) {
+                try {
+                    $upd = $pdo->prepare("UPDATE `user` SET `password`=:p WHERE `id`=:id");
+                    $upd->execute(['p' => hashPassword($plain), 'id' => $userId]);
+                } catch (PDOException $e) {
+                    // Non-fatal: login still succeeds even if the upgrade write fails.
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+    return password_verify($plain, $storedHash);
+}
+
+/*****************************************
  * LOGIN LOGIC
  * ****************************************
  */
@@ -56,20 +94,28 @@ function loginlogic() {
     global $pdo;
     //var_dump($_POST);
     //exit(0);
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+    // Basic brute-force throttling: lock out for 15 minutes after 5 failures.
+    $now = time();
+    if (isset($_SESSION['login_lock_until']) && $now < $_SESSION['login_lock_until']) {
+        $wait = ceil(($_SESSION['login_lock_until'] - $now) / 60);
+        echo "Too many failed login attempts. Please wait {$wait} minute(s) and try again.";
+        return;
+    }
     $msg = "";
     $username = trim($_POST['Email']);
-    $password = md5(trim($_POST['Password']));
+    $password = trim($_POST['Password']);
     if($username != "" && $password != "") {
         try {
-            $query = "select * from `user` where `email`=:username and `password`=:password";
+            $query = "select * from `user` where `email`=:username";
             $stmt = $pdo->prepare($query);
             $stmt->bindParam('username', $username, PDO::PARAM_STR);
-            $stmt->bindValue('password', $password, PDO::PARAM_STR);
             $stmt->execute();
             $row   = $stmt->fetch(PDO::FETCH_ASSOC);
-            $count = $stmt->rowCount();
             // echo var_dump($row);
-            if($count == 1 && !empty($row)) {
+            if(!empty($row) && verifyUserPassword($password, $row['password'], $row['id'])) {
                 if($row['verified']==0){
                     $msg = "Your account is not approved by admin. Please contact your admin to get it approved!";
                 }else{
@@ -90,6 +136,8 @@ function loginlogic() {
                     $_SESSION['role']=$row["role"];
                     $_SESSION['userid']=$row ["id"];
                     $_SESSION['name']=$name;
+                    // Successful login: clear any throttling counters.
+                    unset($_SESSION['login_attempts'], $_SESSION['login_lock_until']);
                     $msg = "Log in Success!";
                     // var_dump($_SESSION);
                     // exit(0);
@@ -98,10 +146,17 @@ function loginlogic() {
                     echo '<META HTTP-EQUIV="refresh" content="0;URL=' . $URL . '">';
                 }
             } else {
+                // Failed attempt: count it and lock out after 5 failures.
+                $_SESSION['login_attempts'] = (isset($_SESSION['login_attempts']) ? $_SESSION['login_attempts'] : 0) + 1;
+                if ($_SESSION['login_attempts'] >= 5) {
+                    $_SESSION['login_lock_until'] = time() + (15 * 60);
+                    $_SESSION['login_attempts'] = 0;
+                }
                 $msg = "Invalid username and password!";
             }
         } catch (PDOException $e) {
-            echo "Error : ".$e->getMessage();
+            error_log('Login error: ' . $e->getMessage());
+            $msg = "A server error occurred. Please try again later.";
         }
     } else {
         $msg = "Both fields are required!";
@@ -119,7 +174,7 @@ function registerationlogic(){
     $Email = $_POST['Email'];
     $Password= $_POST['Password'];
     $verified=0;
-    $Password=md5($Password);
+    $Password=hashPassword($Password);
     $role=$_POST['role'];
     //var_dump($_POST);
     //exit(0);
@@ -246,6 +301,12 @@ your account and change your security password as someone may have guessed it.</
                 $txt.='<p>Bright Beginnings Family Day Care Team</p>';
                 $txt .= '</body></html>';
 
+                // Actually send the reset email.
+                $headers  = "MIME-Version: 1.0\r\n";
+                $headers .= "Content-type: text/html; charset=UTF-8\r\n";
+                $headers .= "From: Bright Beginnings Family Day Care <noreply@brightbeginningsfdcc.com.au>\r\n";
+                @mail($to, $subject, $txt, $headers);
+
                 $msg = '<div class="alert alert-success alert-dismissible fade show" role="alert">
                       <strong>Success!</strong> If you supplied a correct email address then an email should have been sent to you.
                     </div>';
@@ -269,7 +330,7 @@ your account and change your security password as someone may have guessed it.</
  */
 function resetPasword(){
     global $pdo;
-    $Password=md5($_POST['Password']);
+    $plainPassword = $_POST['Password'];
     $query2 = "SELECT * FROM  `user` WHERE email=:email";
     $stmt2 = $pdo->prepare($query2);
     $stmt2->bindParam('email', $_POST['resetPassEmail'], PDO::PARAM_STR);
@@ -277,10 +338,11 @@ function resetPasword(){
     $row2   = $stmt2->fetch(PDO::FETCH_ASSOC);
 
     //var_dump($row2);
-    if($row2["password"]==$Password){
+    if(!empty($row2) && verifyUserPassword($plainPassword, $row2["password"])){
         echo "New password cannot be same as old one";
     }else {
         //echo "cool update it";
+        $Password = hashPassword($plainPassword);
         $sql = "UPDATE user SET password=? WHERE email=?";
         $stmt= $pdo->prepare($sql);
         $result = $stmt->execute([$Password,$_POST['resetPassEmail']]);
@@ -773,7 +835,7 @@ function updateUser(){
     $Email = $_POST['Email'];
     $Password= $_POST['Password'];
     $role=$_POST['Role'];
-    $Password=md5($Password);
+    $Password=hashPassword($Password);
 
 
 
@@ -816,7 +878,7 @@ function addNewUser(){
     $LastName = $_POST['LastName'];
     $Email = $_POST['Email'];
     $Password= $_POST['Password'];
-    $Password=md5($Password);
+    $Password=hashPassword($Password);
     $verified=1;
     $role=$_POST['Role'];
     $query = "select * from `user` where `email`=:username";

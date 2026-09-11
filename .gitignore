@@ -1,0 +1,15 @@
+# Local secrets (never commit real credentials)
+config.local.php
+
+# Runtime logs
+error_log
+**/error_log
+*.log
+
+# Backups / archives
+*.zip
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+.ftpquota

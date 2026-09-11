@@ -16,7 +16,6 @@ if(!isset($_GET['page']) && isset($_SESSION['currentSession'])){
     echo "<script type='text/javascript'>document.location.href='{$URL}';</script>";
     echo '<META HTTP-EQUIV="refresh" content="0;URL=' . $URL . '">';
 }
-//phpinfo();
 
 ?>
 <!DOCTYPE html>
