@@ -298,6 +298,14 @@ if(!isset($_GET['page']) && isset($_SESSION['currentSession'])){
                         echo '<h1>Unauthorised access</h1>';
                     }
 
+                }elseif($page == 'loginLog'){
+                    if($role==1){
+                        $userObj=new User();
+                        $userObj->loginLog();
+                    }else{
+                        echo '<h1>Unauthorised access</h1>';
+                    }
+
                 }elseif($page == 'unlockAccount'){
                     if($role==1){
                         $email=$_GET['email'];

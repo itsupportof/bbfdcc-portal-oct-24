@@ -123,6 +123,7 @@ if($role==1){
                 <a class="collapse-item" href="?page=addNewUser">Add New User</a>
                 <a class="collapse-item" href="?page=bulkAddUsers">Bulk Upload (CSV)</a>
                 <a class="collapse-item" href="?page=lockedAccounts">Locked Accounts</a>
+                <a class="collapse-item" href="?page=loginLog">Login Log</a>
                 <a class="collapse-item" href="?page=securityResetAll">Require Password Reset (All)</a>
             </div>
         </div>

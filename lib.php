@@ -357,6 +357,28 @@ function clearLoginAttempts($email){
     }
 }
 
+/** Record a successful login: stamp user.last_login and append to login_log. */
+function recordLogin($userId, $email, $name, $role){
+    global $pdo;
+    try {
+        $ip = '';
+        if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+            $parts = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
+            $ip = trim($parts[0]);
+        } elseif (!empty($_SERVER['REMOTE_ADDR'])) {
+            $ip = $_SERVER['REMOTE_ADDR'];
+        }
+        $ua = isset($_SERVER['HTTP_USER_AGENT']) ? substr($_SERVER['HTTP_USER_AGENT'], 0, 255) : '';
+        $pdo->prepare("UPDATE `user` SET `last_login` = NOW() WHERE id = :id")
+            ->execute(array('id' => $userId));
+        $pdo->prepare("INSERT INTO `login_log` (`userid`, `email`, `name`, `role`, `ip`, `user_agent`)
+                       VALUES (:uid, :em, :nm, :r, :ip, :ua)")
+            ->execute(array('uid' => $userId, 'em' => $email, 'nm' => $name, 'r' => $role, 'ip' => $ip, 'ua' => $ua));
+    } catch (PDOException $e) {
+        error_log('recordLogin: ' . $e->getMessage());
+    }
+}
+
 /*****************************************
  * LOGIN LOGIC
  * ****************************************
@@ -410,8 +432,9 @@ function loginlogic() {
                     $_SESSION['userid']=$row ["id"];
                     $_SESSION['name']=$name;
                     $_SESSION['must_change_password']=isset($row['must_change_password']) ? (int)$row['must_change_password'] : 0;
-                    // Successful login: clear any failed-attempt / lock record.
+                    // Successful login: clear any failed-attempt / lock record and log the login.
                     clearLoginAttempts($username);
+                    recordLogin($userId, $username, $name, $row['role']);
                     $msg = "Log in Success!";
                     // var_dump($_SESSION);
                     // exit(0);

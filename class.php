@@ -89,6 +89,7 @@ if ($_SESSION['currentSession'] != 1 ) {
                                     <th>Last Name</th>
                                     <th>Email</th>
                                     <th>Role</th>
+                                    <th>Last Login</th>
                                     <th>Action</th>
                                 </tr>
                                 </thead>
@@ -99,6 +100,7 @@ if ($_SESSION['currentSession'] != 1 ) {
                                     <th>Last Name</th>
                                     <th>Email</th>
                                     <th>Role</th>
+                                    <th>Last Login</th>
                                     <th>Action</th>
                                 </tr>
                                 </tfoot>
@@ -119,7 +121,9 @@ if ($_SESSION['currentSession'] != 1 ) {
                                             }else{
                                                 echo 'Parent';
                                             } ?></td>
-
+                                        <td data-order="<?php echo !empty($data["last_login"]) ? strtotime($data["last_login"]) : 0; ?>">
+                                            <?php echo !empty($data["last_login"]) ? date('d M Y, g:i A', strtotime($data["last_login"])) : '<span style="color:#aaa;">Never</span>'; ?>
+                                        </td>
                                         <td>
 
                                             <a href="?page=editUser&user=<?php echo $data["id"];?>" class="btn btn-primary btn-circle btn-md" id="edit<?php echo $data["id"];?>">
@@ -942,6 +946,65 @@ if ($_SESSION['currentSession'] != 1 ) {
         $URL = "?page=currentUsers&resend=" . ($sent ? 'sent' : 'failed');
         echo "<script type='text/javascript'>document.location.href='{$URL}';</script>";
         echo '<META HTTP-EQUIV="refresh" content="0;URL=' . $URL . '">';
+    }
+
+    /*****************************************
+     * Login Log - full history of successful logins (searchable)
+     * ****************************************
+     */
+    public function loginLog(){
+        global $pdo;
+        $rows = array();
+        try {
+            $rows = $pdo->query("SELECT login_time, name, email, role, ip FROM `login_log` ORDER BY login_time DESC LIMIT 3000")
+                        ->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log('loginLog: ' . $e->getMessage());
+        }
+        ?>
+        <h1 class="h3 mb-4 text-gray-800" style="text-align:center; padding-top:20px;">Login Log</h1>
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Every successful login, most recent first. Use the search box to filter by name, email, role or IP.</h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="loginLogTable" width="100%" cellspacing="0">
+                        <thead>
+                        <tr><th>Login Time</th><th>Name</th><th>Email</th><th>Role</th><th>IP Address</th></tr>
+                        </thead>
+                        <tfoot>
+                        <tr><th>Login Time</th><th>Name</th><th>Email</th><th>Role</th><th>IP Address</th></tr>
+                        </tfoot>
+                        <tbody>
+                        <?php foreach ($rows as $r) {
+                            if ($r['role'] == 1) { $roleName = 'Admin'; }
+                            elseif ($r['role'] == 2) { $roleName = 'Educator/Assistant'; }
+                            elseif ($r['role'] == 3) { $roleName = 'Parent'; }
+                            else { $roleName = '-'; }
+                            $ts = strtotime($r['login_time']);
+                            ?>
+                            <tr>
+                                <td data-order="<?php echo $ts; ?>"><?php echo htmlspecialchars(date('d M Y, g:i A', $ts)); ?></td>
+                                <td><?php echo htmlspecialchars($r['name']); ?></td>
+                                <td><?php echo htmlspecialchars($r['email']); ?></td>
+                                <td><?php echo $roleName; ?></td>
+                                <td><?php echo htmlspecialchars($r['ip']); ?></td>
+                            </tr>
+                        <?php } ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <script type="text/javascript">
+            $(document).ready(function(){
+                if ($.fn.DataTable) {
+                    $('#loginLogTable').DataTable({ order: [[0, 'desc']] });
+                }
+            });
+        </script>
+        <?php
     }
 
     /*****************************************
