@@ -65,6 +65,11 @@ if ($_SESSION['currentSession'] != 1 ) {
                     The user account is deleted successfully
                 </div>';
         }
+        if (isset($_GET['resend']) && $_GET['resend']=="sent"){
+            echo '<div class="alert alert-success" role="alert">A new temporary password was generated and emailed to the user.</div>';
+        }elseif (isset($_GET['resend']) && $_GET['resend']=="failed"){
+            echo '<div class="alert alert-warning" role="alert">A new temporary password was set, but the email could not be sent (mail limit or delivery issue). Try again shortly.</div>';
+        }
         ?>
         <h1 class="h3 mb-4 text-gray-800" style="text-align: center; padding-top: 30px;">Current Users</h1>
         <!-- Page Heading -->
@@ -120,11 +125,15 @@ if ($_SESSION['currentSession'] != 1 ) {
                                             <a href="?page=editUser&user=<?php echo $data["id"];?>" class="btn btn-primary btn-circle btn-md" id="edit<?php echo $data["id"];?>">
                                                 <i class="fas fa-edit"></i>
                                             </a>
+                                            <!-- Resend temporary password -->
+                                            <a href="javascript:void(0);" onclick="confirmResend(<?php echo $data['id']; ?>)" class="btn btn-warning btn-circle btn-md" title="Resend temporary password">
+                                                <i class="fas fa-key"></i>
+                                            </a>
                                             <!-- Delete Button in Each Row -->
                                             <a href="javascript:void(0);" onclick="confirmDelete(<?php echo $data['id']; ?>)" class="btn btn-danger btn-circle btn-md">
                                                 <i class="fas fa-trash"></i>
                                             </a>
-                                        
+
                                         </td>
                                     </tr>
                                 <?php }?>
@@ -144,6 +153,22 @@ if ($_SESSION['currentSession'] != 1 ) {
             if (result.isConfirmed) {
                 // Redirect to the deletion URL
                 window.location.href = `?page=deleteUser&source=allusers&user=${userID}`;
+            }
+        });
+    }
+
+    function confirmResend(userID) {
+        Swal.fire({
+            title: 'Resend temporary password?',
+            text: "This sets a new temporary password and emails it to the user. Their current password will stop working.",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#f6c23e',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, resend'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = `?page=resendTempPassword&user=${userID}`;
             }
         });
     }
@@ -882,6 +907,39 @@ if ($_SESSION['currentSession'] != 1 ) {
             clearLoginAttempts($email);
         }
         $URL = "?page=lockedAccounts&status=unlocked";
+        echo "<script type='text/javascript'>document.location.href='{$URL}';</script>";
+        echo '<META HTTP-EQUIV="refresh" content="0;URL=' . $URL . '">';
+    }
+
+    /*****************************************
+     * Resend a fresh temporary password to one user
+     * ****************************************
+     */
+    public function resendTempPassword($userId){
+        global $pdo;
+        $row = null;
+        try {
+            $stmt = $pdo->prepare("SELECT `first name` AS fn, `last name` AS ln, `email` FROM `user` WHERE id = :id");
+            $stmt->execute(array('id' => $userId));
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log('resendTempPassword select: ' . $e->getMessage());
+        }
+        if (!$row) {
+            echo '<div class="alert alert-danger">User not found.</div>';
+            return;
+        }
+        $temp = generateTempPassword();
+        try {
+            $upd = $pdo->prepare("UPDATE `user` SET `password` = :p, `must_change_password` = 1 WHERE id = :id");
+            $upd->execute(array('p' => hashPassword($temp), 'id' => $userId));
+        } catch (PDOException $e) {
+            error_log('resendTempPassword update: ' . $e->getMessage());
+            echo '<div class="alert alert-danger">Could not update the password. Please try again.</div>';
+            return;
+        }
+        $sent = sendAccountCreatedEmail($row['email'], trim($row['fn'] . ' ' . $row['ln']), $temp);
+        $URL = "?page=currentUsers&resend=" . ($sent ? 'sent' : 'failed');
         echo "<script type='text/javascript'>document.location.href='{$URL}';</script>";
         echo '<META HTTP-EQUIV="refresh" content="0;URL=' . $URL . '">';
     }

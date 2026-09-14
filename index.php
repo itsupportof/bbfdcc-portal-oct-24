@@ -307,6 +307,15 @@ if(!isset($_GET['page']) && isset($_SESSION['currentSession'])){
                         echo '<h1>Unauthorised access</h1>';
                     }
 
+                }elseif($page == 'resendTempPassword'){
+                    if($role==1){
+                        $userid=$_GET['user'];
+                        $userObj=new User();
+                        $userObj->resendTempPassword($userid);
+                    }else{
+                        echo '<h1>Unauthorised access</h1>';
+                    }
+
                 }elseif($page == 'changePassword'){
                     $userObj=new User();
                     $userObj->forceChangePasswordForm();

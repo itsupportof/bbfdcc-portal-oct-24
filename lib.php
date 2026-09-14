@@ -25,6 +25,8 @@ if(isset($_POST['loginProcess'])) {
     resetPasword();
 }elseif(isset($_POST['changePasswordFirstLogin'])){
     changePasswordFirstLogin();
+}elseif(isset($_POST['clearNewUsers'])){
+    clearNewUsersNotification();
 }else if(isset($_POST['page']) && $_POST['page']=='addNewResource'){
     addNewResource();
 }if(isset($_POST['page']) && $_POST['page']=='updateResource'){
@@ -627,12 +629,30 @@ function resetPasword(){
  * 'Notification Bar'
  * ****************************************
  */
+/** Clear the "new users" notification: reset the flag in the DB and the session. */
+function clearNewUsersNotification(){
+    global $pdo;
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+    if (empty($_SESSION['role']) || $_SESSION['role'] != 1) {
+        echo 'unauthorised';
+        return;
+    }
+    try {
+        $pdo->exec("UPDATE `user` SET `newuser` = 0 WHERE `newuser` = 1");
+    } catch (PDOException $e) {
+        error_log('clearNewUsersNotification: ' . $e->getMessage());
+    }
+    $_SESSION['newusers'] = 0;
+    echo 'ok';
+}
 function notificationBar(){
 ?>
 <li class="nav-item dropdown no-arrow mx-1">
                             <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                                 <i class="fas fa-bell fa-fw"></i>
-                                <?php if($_SESSION['newusers']!=0){?>
+                                <?php if(!empty($_SESSION['newusers'])){?>
                                 <!-- Counter - Alerts -->
                                 <span class="badge badge-danger badge-counter"><?php echo  $_SESSION['newusers'];?></span>
                                 <?php }  ?>
@@ -642,7 +662,7 @@ function notificationBar(){
                                 <h6 class="dropdown-header">
                                     Alerts Center
                                 </h6>
-                                <?php if($_SESSION['newusers'] !=0){?>
+                                <?php if(!empty($_SESSION['newusers'])){?>
                                 <a class="dropdown-item d-flex align-items-center" href="./?page=pendingUsers">
                                     <div class="mr-3">
                                         <div class="icon-circle bg-success">
@@ -672,7 +692,18 @@ function notificationBar(){
                                 ?>
                             </div>
                     </li>
-
+<script type="text/javascript">
+    // Clicking the bell clears the "new users" badge (once) for good.
+    $(function(){
+        $('#alertsDropdown').on('click', function(){
+            var badge = $(this).find('.badge-counter');
+            if (badge.length){
+                badge.remove();
+                $.post('lib.php', { clearNewUsers: 1 });
+            }
+        });
+    });
+</script>
 <?php
 }
 /*****************************************
