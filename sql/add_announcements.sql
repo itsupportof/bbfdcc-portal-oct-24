@@ -13,6 +13,9 @@ CREATE TABLE IF NOT EXISTS `announcements` (
   KEY `idx_ann_created` (`created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- Audience targeting: '2' Educators/Assistants, '3' Parents, '23' both.
+ALTER TABLE `announcements` ADD COLUMN `audience` VARCHAR(10) NOT NULL DEFAULT '23';
+
 CREATE TABLE IF NOT EXISTS `announcement_recipients` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `announcement_id` INT NOT NULL,

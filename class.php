@@ -7521,9 +7521,18 @@ class Announcement {
     public function viewAll(){
         global $pdo;
         $rows = array();
+        $role = function_exists('effectiveRole') ? effectiveRole() : (isset($_SESSION['role']) ? $_SESSION['role'] : 0);
         try {
-            $rows = $pdo->query("SELECT title, body, created_by_name, created_at FROM `announcements` ORDER BY created_at DESC")
-                        ->fetchAll(PDO::FETCH_ASSOC);
+            if ($role == 1) {
+                $rows = $pdo->query("SELECT title, body, created_by_name, created_at, audience FROM `announcements` ORDER BY created_at DESC")
+                            ->fetchAll(PDO::FETCH_ASSOC);
+            } else {
+                // Educators (2) see 2 & 23; Parents (3) see 3 & 23.
+                $vals = ($role == 2) ? array('2','23') : array('3','23');
+                $in = "'" . implode("','", $vals) . "'";
+                $rows = $pdo->query("SELECT title, body, created_by_name, created_at, audience FROM `announcements` WHERE audience IN ($in) ORDER BY created_at DESC")
+                            ->fetchAll(PDO::FETCH_ASSOC);
+            }
         } catch (PDOException $e) {
             error_log('Announcement viewAll: ' . $e->getMessage());
         }
@@ -7536,7 +7545,14 @@ class Announcement {
                 <div class="card shadow mb-4">
                     <div class="card-header py-3 d-flex justify-content-between align-items-center">
                         <h6 class="m-0 font-weight-bold text-primary"><?php echo htmlspecialchars($a['title']); ?></h6>
-                        <span class="small text-gray-500"><?php echo htmlspecialchars(date('d M Y, g:i A', strtotime($a['created_at']))); ?></span>
+                        <span class="small text-gray-500">
+                            <?php if ($role == 1) {
+                                $aud = isset($a['audience']) ? $a['audience'] : '23';
+                                $audLabel = ($aud == '2') ? 'Educators/Assistants' : (($aud == '3') ? 'Parents' : 'Everyone');
+                                echo '<span class="badge badge-info mr-2">To: ' . $audLabel . '</span>';
+                            } ?>
+                            <?php echo htmlspecialchars(date('d M Y, g:i A', strtotime($a['created_at']))); ?>
+                        </span>
                     </div>
                     <div class="card-body">
                         <div><?php echo nl2br(htmlspecialchars($a['body'])); ?></div>
@@ -7566,9 +7582,17 @@ class Announcement {
                                 <label for="body"><strong>Message</strong></label>
                                 <textarea class="form-control" id="body" name="body" rows="8" required></textarea>
                             </div>
+                            <div class="form-group">
+                                <label for="audience"><strong>Send to</strong></label>
+                                <select class="form-control" id="audience" name="audience">
+                                    <option value="23" selected>Everyone (Educators/Assistants &amp; Parents)</option>
+                                    <option value="2">Educators/Assistants only</option>
+                                    <option value="3">Parents only</option>
+                                </select>
+                            </div>
                             <div class="form-group form-check">
                                 <input type="checkbox" class="form-check-input" id="send_email" name="send_email" value="1" checked>
-                                <label class="form-check-label" for="send_email">Also email this announcement to all users</label>
+                                <label class="form-check-label" for="send_email">Also email this announcement to the selected audience</label>
                             </div>
                             <div class="alert alert-info small">Emails are sent in small batches to respect the mail server's limits. After posting, you'll see a screen that sends them a few at a time (or a cron job can do it automatically).</div>
                             <button type="submit" class="btn btn-primary"><i class="fas fa-bullhorn"></i> Post announcement</button>
@@ -7587,6 +7611,7 @@ class Announcement {
         $title = isset($_POST['title']) ? trim($_POST['title']) : '';
         $body  = isset($_POST['body']) ? trim($_POST['body']) : '';
         $sendEmail = isset($_POST['send_email']) ? 1 : 0;
+        $audience = isset($_POST['audience']) && in_array($_POST['audience'], array('2','3','23'), true) ? $_POST['audience'] : '23';
         if ($title === '' || $body === '') {
             echo '<div class="alert alert-danger">Title and message are required. <a href="?page=createAnnouncement">Go back</a>.</div>';
             return;
@@ -7594,9 +7619,9 @@ class Announcement {
         $createdBy = isset($_SESSION['userid']) ? $_SESSION['userid'] : null;
         $createdByName = isset($_SESSION['name']) ? $_SESSION['name'] : '';
         try {
-            $ins = $pdo->prepare("INSERT INTO `announcements` (title, body, created_by, created_by_name, send_email)
-                                  VALUES (:t, :b, :cb, :cbn, :se)");
-            $ins->execute(array('t' => $title, 'b' => $body, 'cb' => $createdBy, 'cbn' => $createdByName, 'se' => $sendEmail));
+            $ins = $pdo->prepare("INSERT INTO `announcements` (title, body, created_by, created_by_name, send_email, audience)
+                                  VALUES (:t, :b, :cb, :cbn, :se, :au)");
+            $ins->execute(array('t' => $title, 'b' => $body, 'cb' => $createdBy, 'cbn' => $createdByName, 'se' => $sendEmail, 'au' => $audience));
             $announcementId = (int)$pdo->lastInsertId();
         } catch (PDOException $e) {
             error_log('Announcement create: ' . $e->getMessage());
@@ -7605,8 +7630,11 @@ class Announcement {
         }
         if ($sendEmail) {
             try {
+                // Target only the chosen audience: '2' educators, '3' parents, '23' both.
+                $roles = ($audience === '2') ? array('2') : (($audience === '3') ? array('3') : array('2','3'));
+                $in = "'" . implode("','", $roles) . "'";
                 $users = $pdo->query("SELECT `email`, TRIM(CONCAT(`first name`, ' ', `last name`)) AS name
-                                      FROM `user` WHERE `verified` = 1 AND `email` <> ''")->fetchAll(PDO::FETCH_ASSOC);
+                                      FROM `user` WHERE `verified` = 1 AND `email` <> '' AND `role` IN ($in)")->fetchAll(PDO::FETCH_ASSOC);
                 $q = $pdo->prepare("INSERT INTO `announcement_recipients` (announcement_id, email, name, status)
                                     VALUES (:aid, :em, :nm, 'pending')");
                 foreach ($users as $u) {
