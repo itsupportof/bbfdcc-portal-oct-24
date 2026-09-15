@@ -7510,4 +7510,147 @@ class Parents{
 }
 /*-/////////////////-----v2.0 changes for adding more forms//////////----*/
 
+/*****************************************
+ * Announcements: post an announcement, show it in the portal,
+ * and (optionally) email it to all users via a throttled queue.
+ * ****************************************
+ */
+class Announcement {
+
+    /** List all announcements (visible to every logged-in user). */
+    public function viewAll(){
+        global $pdo;
+        $rows = array();
+        try {
+            $rows = $pdo->query("SELECT title, body, created_by_name, created_at FROM `announcements` ORDER BY created_at DESC")
+                        ->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log('Announcement viewAll: ' . $e->getMessage());
+        }
+        ?>
+        <h1 class="h3 mb-4 text-gray-800" style="text-align:center; padding-top:20px;">Announcements</h1>
+        <?php if (empty($rows)) { ?>
+            <div class="card mb-4 py-3 border-left-info"><div class="card-body">There are no announcements yet.</div></div>
+        <?php } else {
+            foreach ($rows as $a) { ?>
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                        <h6 class="m-0 font-weight-bold text-primary"><?php echo htmlspecialchars($a['title']); ?></h6>
+                        <span class="small text-gray-500"><?php echo htmlspecialchars(date('d M Y, g:i A', strtotime($a['created_at']))); ?></span>
+                    </div>
+                    <div class="card-body">
+                        <div><?php echo nl2br(htmlspecialchars($a['body'])); ?></div>
+                        <?php if (!empty($a['created_by_name'])) { ?>
+                            <hr><span class="small text-gray-500">Posted by <?php echo htmlspecialchars($a['created_by_name']); ?></span>
+                        <?php } ?>
+                    </div>
+                </div>
+            <?php }
+        }
+    }
+
+    /** Admin form to create a new announcement. */
+    public function createForm(){
+        ?>
+        <h1 class="h3 mb-4 text-gray-800" style="text-align:center; padding-top:20px;">Post an Announcement</h1>
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card shadow mb-4">
+                    <div class="card-body">
+                        <form action="index.php?page=doCreateAnnouncement" method="post">
+                            <div class="form-group">
+                                <label for="title"><strong>Title</strong></label>
+                                <input type="text" class="form-control" id="title" name="title" maxlength="255" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="body"><strong>Message</strong></label>
+                                <textarea class="form-control" id="body" name="body" rows="8" required></textarea>
+                            </div>
+                            <div class="form-group form-check">
+                                <input type="checkbox" class="form-check-input" id="send_email" name="send_email" value="1" checked>
+                                <label class="form-check-label" for="send_email">Also email this announcement to all users</label>
+                            </div>
+                            <div class="alert alert-info small">Emails are sent in small batches to respect the mail server's limits. After posting, you'll see a screen that sends them a few at a time (or a cron job can do it automatically).</div>
+                            <button type="submit" class="btn btn-primary"><i class="fas fa-bullhorn"></i> Post announcement</button>
+                            <a href="?page=announcements" class="btn btn-secondary">Cancel</a>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <?php
+    }
+
+    /** Handle the create-announcement POST: store it and queue recipients. */
+    public function create(){
+        global $pdo;
+        $title = isset($_POST['title']) ? trim($_POST['title']) : '';
+        $body  = isset($_POST['body']) ? trim($_POST['body']) : '';
+        $sendEmail = isset($_POST['send_email']) ? 1 : 0;
+        if ($title === '' || $body === '') {
+            echo '<div class="alert alert-danger">Title and message are required. <a href="?page=createAnnouncement">Go back</a>.</div>';
+            return;
+        }
+        $createdBy = isset($_SESSION['userid']) ? $_SESSION['userid'] : null;
+        $createdByName = isset($_SESSION['name']) ? $_SESSION['name'] : '';
+        try {
+            $ins = $pdo->prepare("INSERT INTO `announcements` (title, body, created_by, created_by_name, send_email)
+                                  VALUES (:t, :b, :cb, :cbn, :se)");
+            $ins->execute(array('t' => $title, 'b' => $body, 'cb' => $createdBy, 'cbn' => $createdByName, 'se' => $sendEmail));
+            $announcementId = (int)$pdo->lastInsertId();
+        } catch (PDOException $e) {
+            error_log('Announcement create: ' . $e->getMessage());
+            echo '<div class="alert alert-danger">Could not save the announcement. Please try again.</div>';
+            return;
+        }
+        if ($sendEmail) {
+            try {
+                $users = $pdo->query("SELECT `email`, TRIM(CONCAT(`first name`, ' ', `last name`)) AS name
+                                      FROM `user` WHERE `verified` = 1 AND `email` <> ''")->fetchAll(PDO::FETCH_ASSOC);
+                $q = $pdo->prepare("INSERT INTO `announcement_recipients` (announcement_id, email, name, status)
+                                    VALUES (:aid, :em, :nm, 'pending')");
+                foreach ($users as $u) {
+                    $q->execute(array('aid' => $announcementId, 'em' => $u['email'], 'nm' => $u['name']));
+                }
+            } catch (PDOException $e) {
+                error_log('Announcement queue: ' . $e->getMessage());
+            }
+            $URL = "?page=processAnnouncements";
+        } else {
+            $URL = "?page=announcements";
+        }
+        echo "<script type='text/javascript'>document.location.href='{$URL}';</script>";
+        echo '<META HTTP-EQUIV="refresh" content="0;URL=' . $URL . '">';
+    }
+
+    /** Send the next batch of queued emails, then auto-continue until the queue is empty. */
+    public function processBatch(){
+        $res = processAnnouncementQueue(5);
+        ?>
+        <h1 class="h3 mb-4 text-gray-800" style="text-align:center; padding-top:20px;">Sending Announcement Emails</h1>
+        <div class="card shadow mb-4">
+            <div class="card-body">
+                <p>This batch: <strong><?php echo (int)$res['sent']; ?></strong> sent,
+                   <strong><?php echo (int)$res['failed']; ?></strong> not sent.</p>
+                <?php if ((int)$res['remaining'] > 0) { ?>
+                    <div class="alert alert-warning">
+                        <strong><?php echo (int)$res['remaining']; ?></strong> still queued. Keep this page open &mdash; the next
+                        batch sends automatically in about 90 seconds. (You can also close this and let the cron job finish it.)
+                    </div>
+                    <a href="?page=processAnnouncements" class="btn btn-primary">Send next batch now</a>
+                    <a href="?page=announcements" class="btn btn-secondary">Stop for now</a>
+                    <script type="text/javascript">
+                        setTimeout(function(){ window.location.href = '?page=processAnnouncements'; }, 90000);
+                    </script>
+                <?php } else { ?>
+                    <div class="alert alert-success">All announcement emails have been processed.</div>
+                    <a href="?page=announcements" class="btn btn-primary">Back to announcements</a>
+                <?php } ?>
+            </div>
+        </div>
+        <?php
+    }
+}
+/*-/////////////////-----v2.0 changes for adding more forms//////////----*/
+
 ?>

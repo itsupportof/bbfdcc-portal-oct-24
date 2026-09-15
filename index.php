@@ -306,6 +306,38 @@ if(!isset($_GET['page']) && isset($_SESSION['currentSession'])){
                         echo '<h1>Unauthorised access</h1>';
                     }
 
+                }elseif($page == 'announcements'){
+                    if($role==1 || $role==2 || $role==3){
+                        $ann=new Announcement();
+                        $ann->viewAll();
+                    }else{
+                        echo '<h1>Unauthorised access</h1>';
+                    }
+
+                }elseif($page == 'createAnnouncement'){
+                    if($role==1){
+                        $ann=new Announcement();
+                        $ann->createForm();
+                    }else{
+                        echo '<h1>Unauthorised access</h1>';
+                    }
+
+                }elseif($page == 'doCreateAnnouncement'){
+                    if($role==1){
+                        $ann=new Announcement();
+                        $ann->create();
+                    }else{
+                        echo '<h1>Unauthorised access</h1>';
+                    }
+
+                }elseif($page == 'processAnnouncements'){
+                    if($role==1){
+                        $ann=new Announcement();
+                        $ann->processBatch();
+                    }else{
+                        echo '<h1>Unauthorised access</h1>';
+                    }
+
                 }elseif($page == 'unlockAccount'){
                     if($role==1){
                         $email=$_GET['email'];

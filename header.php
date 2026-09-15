@@ -151,6 +151,21 @@ if($role==1){
     <?php } ?>
     <hr class="sidebar-divider my-0">
     <li class="nav-item">
+        <a class="nav-link collapsed" href="?page=announcements" aria-expanded="true">
+            <i class="fas fa-fw fa-bullhorn"></i>
+            <span>Announcements</span>
+        </a>
+    </li>
+    <?php if($role==1){ ?>
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="?page=createAnnouncement" aria-expanded="true">
+            <i class="fas fa-fw fa-plus-circle"></i>
+            <span>Post Announcement</span>
+        </a>
+    </li>
+    <?php } ?>
+    <hr class="sidebar-divider my-0">
+    <li class="nav-item">
         <a class="nav-link collapsed" href="https://brightbeginningsfdcc.com.au/"
            aria-expanded="true" aria-controls="collapseUtilities">
             <i class="fas fa-fw fa-globe"></i>

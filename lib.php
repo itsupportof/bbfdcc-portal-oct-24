@@ -244,6 +244,58 @@ function sendPasswordResetNoticeEmail($email, $name){
     return sendMail($email, $subject, $txt);
 }
 
+/** Build and send one announcement email. */
+function sendAnnouncementEmail($email, $name, $title, $body){
+    $subject = "[Bright Beginnings Family Day Care] " . $title;
+    $txt  = '<html><body>';
+    $txt .= '<p>Dear ' . htmlspecialchars($name !== '' ? $name : 'user') . ',</p>';
+    $txt .= '<h2 style="color:#4e73df;">' . htmlspecialchars($title) . '</h2>';
+    $txt .= '<div>' . nl2br(htmlspecialchars($body)) . '</div>';
+    $txt .= '<hr><p style="font-size:12px;color:#888;">This announcement was sent from the Bright Beginnings Family Day Care portal.</p>';
+    $txt .= '</body></html>';
+    return sendMail($email, $subject, $txt);
+}
+
+/**
+ * Send the next batch of queued announcement emails (throttled).
+ * Called both by the cron script and the manual "send next batch" button.
+ * Returns array('sent'=>, 'failed'=>, 'remaining'=>).
+ */
+function processAnnouncementQueue($limit = 5){
+    global $pdo;
+    $result = array('sent' => 0, 'failed' => 0, 'remaining' => 0);
+    try {
+        $stmt = $pdo->prepare("SELECT ar.id, ar.email, ar.name, ar.attempts, a.title, a.body
+                               FROM announcement_recipients ar
+                               JOIN announcements a ON a.id = ar.announcement_id
+                               WHERE ar.status = 'pending'
+                               ORDER BY ar.id ASC
+                               LIMIT " . (int)$limit);
+        $stmt->execute();
+        $batch = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        foreach ($batch as $r) {
+            $ok = sendAnnouncementEmail($r['email'], (string)$r['name'], $r['title'], $r['body']);
+            $attempts = (int)$r['attempts'] + 1;
+            if ($ok) {
+                $status = 'sent';
+                $result['sent']++;
+            } elseif ($attempts >= 3) {
+                $status = 'failed';
+                $result['failed']++;
+            } else {
+                $status = 'pending'; // leave queued for a later retry
+                $result['failed']++;
+            }
+            $pdo->prepare("UPDATE announcement_recipients SET status=:s, attempts=:a, updated_at=NOW() WHERE id=:id")
+                ->execute(array('s' => $status, 'a' => $attempts, 'id' => $r['id']));
+        }
+        $result['remaining'] = (int)$pdo->query("SELECT COUNT(*) FROM announcement_recipients WHERE status='pending'")->fetchColumn();
+    } catch (PDOException $e) {
+        error_log('processAnnouncementQueue: ' . $e->getMessage());
+    }
+    return $result;
+}
+
 /** Handle the forced first-login password change (posted from the change-password form). */
 function changePasswordFirstLogin(){
     global $pdo;
