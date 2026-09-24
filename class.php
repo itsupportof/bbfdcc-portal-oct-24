@@ -122,7 +122,7 @@ if ($_SESSION['currentSession'] != 1 ) {
                                                 echo 'Parent';
                                             } ?></td>
                                         <td data-order="<?php echo !empty($data["last_login"]) ? strtotime($data["last_login"]) : 0; ?>">
-                                            <?php echo !empty($data["last_login"]) ? date('d M Y, g:i A', strtotime($data["last_login"])) : '<span style="color:#aaa;">Never</span>'; ?>
+                                            <?php echo !empty($data["last_login"]) ? htmlspecialchars(fmtMelbourne($data["last_login"])) : '<span style="color:#aaa;">Never</span>'; ?>
                                         </td>
                                         <td>
 
@@ -985,7 +985,7 @@ if ($_SESSION['currentSession'] != 1 ) {
                             $ts = strtotime($r['login_time']);
                             ?>
                             <tr>
-                                <td data-order="<?php echo $ts; ?>"><?php echo htmlspecialchars(date('d M Y, g:i A', $ts)); ?></td>
+                                <td data-order="<?php echo $ts; ?>"><?php echo htmlspecialchars(fmtMelbourne($r['login_time'])); ?></td>
                                 <td><?php echo htmlspecialchars($r['name']); ?></td>
                                 <td><?php echo htmlspecialchars($r['email']); ?></td>
                                 <td><?php echo $roleName; ?></td>
@@ -7551,7 +7551,7 @@ class Announcement {
                                 $audLabel = ($aud == '2') ? 'Educators/Assistants' : (($aud == '3') ? 'Parents' : 'Everyone');
                                 echo '<span class="badge badge-info mr-2">To: ' . $audLabel . '</span>';
                             } ?>
-                            <?php echo htmlspecialchars(date('d M Y, g:i A', strtotime($a['created_at']))); ?>
+                            <?php echo htmlspecialchars(fmtMelbourne($a['created_at'])); ?>
                         </span>
                     </div>
                     <div class="card-body">

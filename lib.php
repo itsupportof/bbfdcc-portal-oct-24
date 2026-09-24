@@ -62,6 +62,24 @@ function hashPassword($plain) {
 }
 
 /**
+ * Format a database datetime (stored by MySQL NOW() in the server's Perth/AWST
+ * timezone) as Melbourne local time. Melbourne DST (AEST/AEDT) is handled
+ * automatically. Returns '' for empty input.
+ */
+function fmtMelbourne($dt, $withTz = true) {
+    if (empty($dt) || $dt === '0000-00-00 00:00:00') {
+        return '';
+    }
+    try {
+        $d = new DateTime($dt, new DateTimeZone('Australia/Perth'));
+        $d->setTimezone(new DateTimeZone('Australia/Melbourne'));
+        return $d->format($withTz ? 'd M Y, g:i A T' : 'd M Y, g:i A');
+    } catch (Exception $e) {
+        return $dt;
+    }
+}
+
+/**
  * Validate a plaintext password against the portal's password policy.
  * Returns an empty string when valid, or a human-readable error message.
  * Keep the rules in sync with the client-side checks on the register /
